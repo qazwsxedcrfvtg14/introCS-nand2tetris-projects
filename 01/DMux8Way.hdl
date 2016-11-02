@@ -1,0 +1,72 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/DMux8Way.hdl
+
+/**
+ * 8-way demultiplexor:
+ * {a, b, c, d, e, f, g, h} = {in, 0, 0, 0, 0, 0, 0, 0} if sel == 000
+ *                            {0, in, 0, 0, 0, 0, 0, 0} if sel == 001
+ *                            etc.
+ *                            {0, 0, 0, 0, 0, 0, 0, in} if sel == 111
+ */
+
+CHIP DMux8Way {
+    IN in, sel[3];
+    OUT a, b, c, d, e, f, g, h;
+
+    PARTS:
+    // Put your code here:
+    
+    Nand(a=sel[0],b=sel[0],out=nsel0);
+    Nand(a=sel[1],b=sel[1],out=nsel1);
+    Nand(a=sel[2],b=sel[2],out=nsel2);
+    Nand(a=in,b=nsel0,out=x0);
+    Nand(a=x0,b=x0,out=nx0);
+    Nand(a=nx0,b=nsel1,out=y0);
+    Nand(a=y0,b=y0,out=ny0);
+    Nand(a=ny0,b=nsel2,out=z0);
+    Nand(a=z0,b=z0,out=a);
+    Nand(a=in,b=sel[0],out=x1);
+    Nand(a=x1,b=x1,out=nx1);
+    Nand(a=nx1,b=nsel1,out=y1);
+    Nand(a=y1,b=y1,out=ny1);
+    Nand(a=ny1,b=nsel2,out=z1);
+    Nand(a=z1,b=z1,out=b);
+    Nand(a=in,b=nsel0,out=x2);
+    Nand(a=x2,b=x2,out=nx2);
+    Nand(a=nx2,b=sel[1],out=y2);
+    Nand(a=y2,b=y2,out=ny2);
+    Nand(a=ny2,b=nsel2,out=z2);
+    Nand(a=z2,b=z2,out=c);
+    Nand(a=in,b=sel[0],out=x3);
+    Nand(a=x3,b=x3,out=nx3);
+    Nand(a=nx3,b=sel[1],out=y3);
+    Nand(a=y3,b=y3,out=ny3);
+    Nand(a=ny3,b=nsel2,out=z3);
+    Nand(a=z3,b=z3,out=d);
+    Nand(a=in,b=nsel0,out=x4);
+    Nand(a=x4,b=x4,out=nx4);
+    Nand(a=nx4,b=nsel1,out=y4);
+    Nand(a=y4,b=y4,out=ny4);
+    Nand(a=ny4,b=sel[2],out=z4);
+    Nand(a=z4,b=z4,out=e);
+    Nand(a=in,b=sel[0],out=x5);
+    Nand(a=x5,b=x5,out=nx5);
+    Nand(a=nx5,b=nsel1,out=y5);
+    Nand(a=y5,b=y5,out=ny5);
+    Nand(a=ny5,b=sel[2],out=z5);
+    Nand(a=z5,b=z5,out=f);
+    Nand(a=in,b=nsel0,out=x6);
+    Nand(a=x6,b=x6,out=nx6);
+    Nand(a=nx6,b=sel[1],out=y6);
+    Nand(a=y6,b=y6,out=ny6);
+    Nand(a=ny6,b=sel[2],out=z6);
+    Nand(a=z6,b=z6,out=g);
+    Nand(a=in,b=sel[0],out=x7);
+    Nand(a=x7,b=x7,out=nx7);
+    Nand(a=nx7,b=sel[1],out=y7);
+    Nand(a=y7,b=y7,out=ny7);
+    Nand(a=ny7,b=sel[2],out=z7);
+    Nand(a=z7,b=z7,out=h);
+}

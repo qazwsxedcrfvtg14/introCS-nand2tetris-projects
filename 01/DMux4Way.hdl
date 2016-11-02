@@ -1,0 +1,42 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/DMux4Way.hdl
+
+/**
+ * 4-way demultiplexor:
+ * {a, b, c, d} = {in, 0, 0, 0} if sel == 00
+ *                {0, in, 0, 0} if sel == 01
+ *                {0, 0, in, 0} if sel == 10
+ *                {0, 0, 0, in} if sel == 11
+ */
+
+CHIP DMux4Way {
+    IN in, sel[2];
+    OUT a, b, c, d;
+
+    PARTS:
+    // Put your code here:
+    Nand(a=sel[0],b=sel[0],out=nsel0);
+    Nand(a=sel[1],b=sel[1],out=nsel1);
+
+    Nand(a=in,b=nsel0,out=x1);
+    Nand(a=x1,b=x1,out=nx1);
+    Nand(a=nx1,b=nsel1,out=na);
+    Nand(a=na,b=na,out=a);
+
+    Nand(a=in,b=sel[0],out=x2);
+    Nand(a=x2,b=x2,out=nx2);
+    Nand(a=nx2,b=nsel1,out=nb);
+    Nand(a=nb,b=nb,out=b);
+
+    Nand(a=in,b=nsel0,out=x3);
+    Nand(a=x3,b=x3,out=nx3);
+    Nand(a=nx3,b=sel[1],out=nc);
+    Nand(a=nc,b=nc,out=c);
+
+    Nand(a=in,b=sel[0],out=x4);
+    Nand(a=x4,b=x4,out=nx4);
+    Nand(a=nx4,b=sel[1],out=nd);
+    Nand(a=nd,b=nd,out=d);
+}

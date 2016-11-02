@@ -1,0 +1,67 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/Mux16.hdl
+
+/**
+ * 16-bit multiplexor: 
+ * for i = 0..15 out[i] = a[i] if sel == 0 
+ *                        b[i] if sel == 1
+ */
+
+CHIP Mux16 {
+    IN a[16], b[16], sel;
+    OUT out[16];
+
+    PARTS:
+    // Put your code here:
+    Nand(a=sel,b=sel,out=nsel);
+    Nand(a=sel,b=b[0],out=c0);
+    Nand(a=a[0],b=nsel,out=c1);
+    Nand(a=c0,b=c1,out=out[0]);
+    Nand(a=sel,b=b[1],out=c2);
+    Nand(a=a[1],b=nsel,out=c3);
+    Nand(a=c2,b=c3,out=out[1]);
+    Nand(a=sel,b=b[2],out=c4);
+    Nand(a=a[2],b=nsel,out=c5);
+    Nand(a=c4,b=c5,out=out[2]);
+    Nand(a=sel,b=b[3],out=c6);
+    Nand(a=a[3],b=nsel,out=c7);
+    Nand(a=c6,b=c7,out=out[3]);
+    Nand(a=sel,b=b[4],out=c8);
+    Nand(a=a[4],b=nsel,out=c9);
+    Nand(a=c8,b=c9,out=out[4]);
+    Nand(a=sel,b=b[5],out=c10);
+    Nand(a=a[5],b=nsel,out=c11);
+    Nand(a=c10,b=c11,out=out[5]);
+    Nand(a=sel,b=b[6],out=c12);
+    Nand(a=a[6],b=nsel,out=c13);
+    Nand(a=c12,b=c13,out=out[6]);
+    Nand(a=sel,b=b[7],out=c14);
+    Nand(a=a[7],b=nsel,out=c15);
+    Nand(a=c14,b=c15,out=out[7]);
+    Nand(a=sel,b=b[8],out=c16);
+    Nand(a=a[8],b=nsel,out=c17);
+    Nand(a=c16,b=c17,out=out[8]);
+    Nand(a=sel,b=b[9],out=c18);
+    Nand(a=a[9],b=nsel,out=c19);
+    Nand(a=c18,b=c19,out=out[9]);
+    Nand(a=sel,b=b[10],out=c20);
+    Nand(a=a[10],b=nsel,out=c21);
+    Nand(a=c20,b=c21,out=out[10]);
+    Nand(a=sel,b=b[11],out=c22);
+    Nand(a=a[11],b=nsel,out=c23);
+    Nand(a=c22,b=c23,out=out[11]);
+    Nand(a=sel,b=b[12],out=c24);
+    Nand(a=a[12],b=nsel,out=c25);
+    Nand(a=c24,b=c25,out=out[12]);
+    Nand(a=sel,b=b[13],out=c26);
+    Nand(a=a[13],b=nsel,out=c27);
+    Nand(a=c26,b=c27,out=out[13]);
+    Nand(a=sel,b=b[14],out=c28);
+    Nand(a=a[14],b=nsel,out=c29);
+    Nand(a=c28,b=c29,out=out[14]);
+    Nand(a=sel,b=b[15],out=c30);
+    Nand(a=a[15],b=nsel,out=c31);
+    Nand(a=c30,b=c31,out=out[15]);
+}
