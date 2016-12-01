@@ -348,6 +348,7 @@ void IfBegin(T x,string cmp,S y){
     glo["cmp"]-=y;
     glo["cmp"].toD();
     put("@if_"+rng_string+"_end");
+    put("//"+cmp+"//");
     if(cmp=="<")
         put("D;JGE");
     if(cmp=="<=")
@@ -403,42 +404,52 @@ void Setup(){
 vector<string>ve;
 //W=32*16
 //H=256
-#define Call FuncCall
-#define Loop LoopBegin();
-#define If(a,b,c) IfBegin((a),(b),(c));
-#define Func(a,b) FuncBegin((a),(b));
-#define End BlockEnd();
+#define Call(a,b) FuncCall((a),b)
+#define Loop LoopBegin();{
+#define If(a,b,c) IfBegin((a),(b),(c));{
+#define Function(a,b) FuncBegin((a),(b));{
+#define Func0(a) FuncBegin((a),0);{
+#define Func1(a,b) FuncBegin((a),1);{var b(0);
+#define Func2(a,b,c) FuncBegin((a),2);{var b(0),c(1);
+#define Func3(a,b,c,d) FuncBegin((a),3);{var b(0),c(1),d(2);
+#define Func4(a,b,c,d,e) FuncBegin((a),4);{var b(0),c(1),d(2),e(3);
+#define Func5(a,b,c,d,e,f) FuncBegin((a),5);{var b(0),c(1),d(2),e(3),f(4);
+#define Func6(a,b,c,d,e,f,g) FuncBegin((a),6);{var b(0),c(1),d(2),e(3),f(4),g(5);
+#define GET_MACRO(_1,_2,_3,_4,_5,_6,_7,NAME,...) NAME
+#define Func(...) GET_MACRO(__VA_ARGS__, Func6, Func5, Func4, Func3, Func2, Func1, Func0)(__VA_ARGS__)
+#define End }BlockEnd();
 #define Return(a) FuncReturn((a))
 #define Break LoopBreak();
+#define Var var
+#define Mem mem
+#define Global glo
 int main(){
     Setup();
-    var i;
+    Var i;
     i=0x4000;
-    Loop{
+    Loop
         mem[i]=32767;
         i++;
-        If(i,"==",0x4020){
+        If(i,"==",0x4020)
             Break
-        }End
-    }End
-    Func("fib",1){
-        var x(0);
-        If(x,"==",-1){
+        End
+    End
+    Func("fib",x)
+        If(x,"==",-1)
             Return(1);
-        }End
-        If(x,"==",0){
+        End
+        If(x,"==",0)
             Return(1);
-        }End
-        var ret,tmp;
+        End
+        Var ret;
         ret=0;
-        tmp=x;
-        tmp--;
-        ret+=Call("fib",tmp);
-        tmp--;
-        ret+=Call("fib",tmp);
+        x--;
+        ret+=Call("fib",x);
+        x--;
+        ret+=Call("fib",x);
         Return(ret);
-    }End
-    var ans;
+    End
+    Var ans;
     ans=Call("fib",mem[0]);
     mem[2]=ans;
     while_true();
