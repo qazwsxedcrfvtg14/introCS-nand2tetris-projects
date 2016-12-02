@@ -6,19 +6,24 @@ using namespace std;
 #define s second
 typedef pair<int,int>par;
 typedef pair<int,par>pr;
-//0x0000~0x1999 Mem
-//0x2000~0x2999 Flag
+//0x0000~0x2E99 Mem
+//0x2F00~0x2999 Flag
 //0x3000~0x3999 Stack
 //0x4000~0x5999 Screen
 //0x6000 KBD
-const int FlagTop=0x2000;
+const int FlagTop=0x2F00;
 const int StackTop=0x3000;
 vector<string>cmd;
 void put(string s){
     cmd.push_back(s);
     return;
     }
-void optimize(){
+void optimize(int o=0){
+    if(o<=0){
+        for(string &s:cmd)
+            puts(s.c_str());
+        return;
+        }
     int sz=cmd.size();
     vector<string>result,optres;
     string preA="-1";
@@ -49,9 +54,12 @@ void optimize(){
         if(preCmd=="M=D"&&s=="M=M+1"){result.pop_back();result.push_back("M=D+1");continue;}
         if(preCmd=="M=D"&&s=="M=M-1"){result.pop_back();result.push_back("M=D-1");continue;}
         if(preCmd=="M=D"&&s=="M=-M"){result.pop_back();result.push_back("M=-D");continue;}
-        if(preCmd2=="M=D+1"&&preCmd=="A=M"&&s=="M=0"){result.pop_back();result.pop_back();result.push_back("A=D+1");result.push_back("M=0");continue;}
-        if(preCmd2=="M=D-1"&&preCmd=="A=M"&&s=="M=0"){result.pop_back();result.pop_back();result.push_back("A=D-1");result.push_back("M=0");continue;}
         result.push_back(s);
+        }
+    if(o<=1){
+        for(string &s:result)
+            puts(s.c_str());
+        return;
         }
     sz=result.size();
     for(int i=0;i<sz;i++){
@@ -119,6 +127,13 @@ class obj{
                 run_star();
                 put("M=-1");
                 }
+            else if(x==-32768){
+                put("@"+ToStr(32767));
+                put("D=-A");
+                put("@"+ToStr(id));
+                run_star();
+                put("M=D-1");
+                }
             else if(x>0){
                 put("@"+ToStr(x));
                 put("D=A");
@@ -172,9 +187,29 @@ class obj{
                 run_star();
                 put("M=M-1");
                 }
+            else if(x==2){
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M+1");
+                put("M=M+1");
+                }
+            else if(x==-2){
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M-1");
+                put("M=M-1");
+                }
             else if(x>=0){
                 put("@"+ToStr(x));
                 put("D=A");
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M+D");
+                }
+            else if(x==-32768){
+                put("@"+ToStr(32767));
+                put("D=-A");
+                put("D=D-1");
                 put("@"+ToStr(id));
                 run_star();
                 put("M=M+D");
@@ -185,6 +220,46 @@ class obj{
                 put("@"+ToStr(id));
                 run_star();
                 put("M=M+D");
+                }
+            }
+        void operator&=(int x){
+            if(x==0){
+                put("@"+ToStr(id));
+                run_star();
+                put("M=0");
+                }
+            else if(x>0){
+                put("@"+ToStr(x));
+                put("D=A");
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M&D");
+                }
+            else{
+                put("@"+ToStr(-x));
+                put("D=-A");
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M&D");
+                }
+            }
+        void operator|=(int x){
+            if(x==0){
+                return;
+                }
+            else if(x>0){
+                put("@"+ToStr(x));
+                put("D=A");
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M|D");
+                }
+            else{
+                put("@"+ToStr(-x));
+                put("D=-A");
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M|D");
                 }
             }
         void operator-=(int x){
@@ -200,9 +275,29 @@ class obj{
                 run_star();
                 put("M=M+1");
                 }
+            else if(x==2){
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M-1");
+                put("M=M-1");
+                }
+            else if(x==-2){
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M+1");
+                put("M=M+1");
+                }
             else if(x>=0){
                 put("@"+ToStr(x));
                 put("D=A");
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M-D");
+                }
+            else if(x==-32768){
+                put("@"+ToStr(32767));
+                put("D=-A");
+                put("D=D-1");
                 put("@"+ToStr(id));
                 run_star();
                 put("M=M-D");
@@ -230,6 +325,22 @@ class obj{
             put("@"+ToStr(id));
             run_star();
             put("M=M-D");
+            }
+        void operator&=(const obj &x){
+            put("@"+ToStr(x.id));
+            x.run_star();
+            put("D=M");
+            put("@"+ToStr(id));
+            run_star();
+            put("M=M&D");
+            }
+        void operator|=(const obj &x){
+            put("@"+ToStr(x.id));
+            x.run_star();
+            put("D=M");
+            put("@"+ToStr(id));
+            run_star();
+            put("M=M|D");
             }
         void operator*=(int x){
             if(x==1)
@@ -334,6 +445,12 @@ class var{
         void operator-=(int x){
             (this->to_obj())-=x;
             }
+        void operator&=(int x){
+            (this->to_obj())&=x;
+            }
+        void operator|=(int x){
+            (this->to_obj())|=x;
+            }
         void operator*=(int x){
             (this->to_obj())*=x;
             }
@@ -342,6 +459,12 @@ class var{
             }
         void operator-=(const obj &x){
             (this->to_obj())-=x;
+            }
+        void operator&=(const obj &x){
+            (this->to_obj())&=x;
+            }
+        void operator|=(const obj &x){
+            (this->to_obj())|=x;
             }
         void toA(){
             (this->to_obj()).toA();
@@ -392,7 +515,7 @@ void pop(){
 //...
 map<string,int>func_args;
 stack<string>func_stack;
-stack<int>block_stack,loop_esp_stack;
+stack<int>block_stack,loop_esp_stack,if_esp_stack;
 void FuncBegin(string fun,int args=0){
     if(func_args.find(fun)!=func_args.end()) throw "multi define function error";
     block_stack.push(0);
@@ -458,6 +581,7 @@ stack<string>if_stack;
 template<typename T,typename S>
 void IfBegin(T x,string cmp,S y){
     block_stack.push(1);
+    if_esp_stack.push(esp_ebp.top());
     string rng_string;
     for(int i=0;i<8;i++)
         rng_string+=(rand()>>2)%26+'A';
@@ -481,6 +605,10 @@ void IfBegin(T x,string cmp,S y){
     }
 void IfEnd(){
     if(if_stack.empty()) throw "end without if error";
+    int d=esp_ebp.top()-if_esp_stack.top();
+    if_esp_stack.pop();
+    if(d)glo["esp"]-=d;
+    esp_ebp.top()-=d;
     string rng_string=if_stack.top();
     put("(if_"+rng_string+"_end)");
     if_stack.pop();
@@ -509,6 +637,7 @@ void LoopEnd(){
     int d=esp_ebp.top()-loop_esp_stack.top();
     loop_esp_stack.pop();
     if(d)glo["esp"]-=d;
+    esp_ebp.top()-=d;
     put("@loop_"+rng_string+"_begin");
     put("0;JMP");
     put("(loop_"+rng_string+"_end)");
@@ -564,28 +693,222 @@ vector<string>ve;
 #define End }BlockEnd();
 #define Return(a) FuncReturn((a))
 #define Break LoopBreak();
-#define Finish while_true();StackCheck();}catch(char const* error){puts(error);return 0;}optimize();return 0;}
+#define Finish while_true();StackCheck();}catch(char const* error){puts(error);return 0;}optimize(2);return 0;}
 #define Var var
 #define Mem mem
 #define Global glo
 
+const int ScreenBuffer=0x0F00;
+const int KBD=0x6000;
 Begin
-    Global["status"]=0;
-    Func(set_screen,x)
-        If(x,!=,Global["status"])
-            Global["status"]=x;
-            Var i;
-            i=0x4000;
-            Loop
-                mem[i]=x;
-                i++;
-                If(i,==,0x6000)
-                    Break;
-                End
+    Func(clean)
+        Var j;
+        j=ScreenBuffer;
+        Loop
+            mem[j]=0;
+            j++;
+            If(j,==,0x2F00)
+                Break;
             End
         End
     End
-    Call(set_screen,0);
+    Func(set_screen)
+        Var i,j;
+        i=0x4000;
+        j=ScreenBuffer;
+        Loop
+            mem[i]=mem[j];
+            i++;
+            j++;
+            If(i,==,0x6000)
+                Break;
+            End
+        End
+    End
+    for(int i=0;i<16;i++)
+        Mem[i]=-(1<<i);
+    Mem[16]=-1;
+    for(int i=0;i<15;i++)
+        Mem[i+16]=(1<<i+1)-1;
+    Mem[31]=-1;
+    for(int i=0;i<32;i++)
+        Mem[(i<<4)+32]=i;
+    Func(draw_rect,x1,x2,y1,y2)
+        If(x1,>,x2)
+            Return(0);
+        End
+        If(y1,>,y2)
+            Return(0);
+        End
+        Var x1_high,x1_low,x2_high,x2_low;
+        x1_low=x1;
+        x1_low&=15;
+        x1_low=Mem[x1_low];
+        x1_high=x1;
+        x1_high&=-16;
+        x1_high+=32;
+        x1_high=Mem[x1_high];
+        x2_low=x2;
+        x2_low&=15;
+        x2_low+=16;
+        x2_low=Mem[x2_low];
+        x2_high=x2;
+        x2_high&=-16;
+        x2_high+=32;
+        x2_high=Mem[x2_high];
+        If(x1_high,==,x2_high)
+            x1_low&=x2_low;
+            x2_low=x1_low;
+        End
+        Var line_begin,y32;
+        line_begin=ScreenBuffer;
+        y32=y1;
+        y32+=y32;//2
+        y32+=y32;//4
+        y32+=y32;//8
+        y32+=y32;//16
+        y32+=y32;//32
+        line_begin+=y32;
+        Loop
+            Var pos,i;
+            pos=line_begin;
+            pos+=x2_high;
+            mem[pos]|=x2_low;
+            pos=line_begin;
+            pos+=x1_high;
+            mem[pos]|=x1_low;
+            i=x1_high;
+            Loop
+                pos++;
+                i++;
+                If(i,>=,x2_high)
+                    Break
+                End
+                mem[pos]|=-1;
+            End
+            line_begin+=32;
+            y1++;
+            If(y1,>,y2)
+                Break
+            End
+        End
+    End
+    Func(GameOver)
+        Call(clean);
+        Call(draw_rect,0,511,0,255);
+        Call(set_screen);
+        Stop
+    End
+    Var vx,vy,len;
+    const int ar=0x0400,snake_len=16;
+    vx=16;
+    vy=0;
+    len=snake_len;
+    for(int i=0;i<snake_len;i++){
+        mem[ar+i*2]=16*(snake_len-i-1);
+        mem[ar+i*2+1]=0;
+        }
+    /*
+    mem[ar]=32;
+    mem[ar+1]=0;
+    mem[ar+2]=16;
+    mem[ar+3]=0;
+    mem[ar+4]=0;
+    mem[ar+5]=0;*/
+    Loop
+        Call(clean);
+        If(Mem[KBD],==,130)
+            Var tmp;
+            tmp=mem[ar];
+            tmp-=mem[ar+2];
+            If(tmp,!=,16)
+                vx=-16;
+                vy=0;
+            End
+        End
+        If(Mem[KBD],==,131)
+            Var tmp;
+            tmp=mem[ar+1];
+            tmp-=mem[ar+3];
+            If(tmp,!=,16)
+                vx=0;
+                vy=-16;
+            End
+        End
+        If(Mem[KBD],==,132)
+            Var tmp;
+            tmp=mem[ar];
+            tmp-=mem[ar+2];
+            If(tmp,!=,-16)
+                vx=16;
+                vy=0;
+            End
+        End
+        If(Mem[KBD],==,133)
+            Var tmp;
+            tmp=mem[ar+1];
+            tmp-=mem[ar+3];
+            If(tmp,!=,-16)
+                vx=0;
+                vy=16;
+            End
+        End
+        Var i,j;
+        i=ar;
+        i+=len;
+        i+=len;
+        j=i;
+        j-=2;
+        Loop
+            i--;j--;
+            mem[i]=mem[j];
+            i--;j--;
+            mem[i]=mem[j];
+            If(i,==,ar+2)
+                Break
+            End
+        End
+        mem[ar]+=vx;
+        mem[ar+1]+=vy;
+        If(mem[ar],<,0)
+            Call(GameOver);
+        End
+        If(mem[ar+1],<,0)
+            Call(GameOver);
+        End
+        If(mem[ar],>=,512)
+            Call(GameOver);
+        End
+        If(mem[ar+1],>=,256)
+            Call(GameOver);
+        End
+        i=ar;
+        i+=len;
+        i+=len;
+        Loop
+            Var x,y,xx,yy;
+            i--;
+            y=mem[i];
+            yy=y;
+            yy+=15;
+            i--;
+            x=mem[i];
+            xx=x;
+            xx+=15;
+            Call(draw_rect,x,xx,y,yy);
+            If(i,==,ar)
+                Break
+            End
+            If(mem[ar],==,x)
+                If(mem[ar+1],==,y)
+                    Call(GameOver);
+                End
+            End
+        End
+        Call(set_screen);
+    End
+    Call(GameOver);
+    /*
     Var x;
     Mem[0]=Global["ebp"];
     Loop
@@ -595,6 +918,7 @@ Begin
         End
         Call(set_screen,x);
     End
+    */
 Finish
 
 /*
