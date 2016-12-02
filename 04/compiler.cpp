@@ -276,7 +276,7 @@ map<string,int>func_args;
 stack<string>func_stack;
 stack<int>block_stack;
 void FuncBegin(string fun,int args=0){
-    if(func_args.find(fun)!=func_args.end()) throw "error";
+    if(func_args.find(fun)!=func_args.end()) throw "multi define function error";
     block_stack.push(0);
     func_stack.push(fun);
     func_args[fun]=args;
@@ -290,6 +290,7 @@ void FuncBegin(string fun,int args=0){
     }
 template<typename T>
 void FuncReturn(T ret){
+    if(func_stack.empty()) throw "return without function error";
     string fun=func_stack.top();
     glo["tmp"]=glo["ebp"];
     glo["tmp"]-=2;
@@ -298,6 +299,7 @@ void FuncReturn(T ret){
     put("0;JMP");
     }
 void FuncEnd(){
+    if(func_stack.empty()) throw "end without function error";
     string fun=func_stack.top();
     func_stack.pop();
     put("(Func_"+fun+"_return)");
@@ -348,7 +350,6 @@ void IfBegin(T x,string cmp,S y){
     glo["cmp"]-=y;
     glo["cmp"].toD();
     put("@if_"+rng_string+"_end");
-    put("//"+cmp+"//");
     if(cmp=="<")
         put("D;JGE");
     if(cmp=="<=")
@@ -363,6 +364,7 @@ void IfBegin(T x,string cmp,S y){
         put("D;JEQ");
     }
 void IfEnd(){
+    if(if_stack.empty()) throw "end without if error";
     string rng_string=if_stack.top();
     if_stack.pop();
     put("(if_"+rng_string+"_end)");
@@ -377,6 +379,7 @@ void LoopBegin(){
     put("(loop_"+rng_string+"_begin)");
     }
 void LoopBreak(){
+    if(loop_stack.empty()) throw "end without loop error";
     string rng_string=loop_stack.top();
     put("@loop_"+rng_string+"_end");
     put("0;JMP");
@@ -389,69 +392,76 @@ void LoopEnd(){
     put("(loop_"+rng_string+"_end)");
     }
 void BlockEnd(){
+    if(block_stack.empty()) throw "end without block error";
     int top=block_stack.top();
     block_stack.pop();
     if(top==0)FuncEnd();
     else if(top==1)IfEnd();
     else if(top==2)LoopEnd();
     }
+bool Setuped=false;
 void Setup(){
+    if(Setuped)throw "multi setup error";
+    Setuped=true;
     objcnt=FlagTop;
     glo["ebp"]=StackTop;
     glo["esp"]=glo["ebp"];
     esp_ebp.push(0);
     }
+void StackCheck(){
+    if(!block_stack.empty()) throw "exit without empty stack error";
+    }
 vector<string>ve;
 //W=32*16
 //H=256
-#define Call(a,b) FuncCall((a),b)
+#define Begin int main(){try{Setup();
+#define Call(a,b) FuncCall(#a,b)
 #define Loop LoopBegin();{
-#define If(a,b,c) IfBegin((a),(b),(c));{
+#define If(a,b,c) IfBegin((a),#b,(c));{
 #define Function(a,b) FuncBegin((a),(b));{
-#define Func0(a) FuncBegin((a),0);{
-#define Func1(a,b) FuncBegin((a),1);{var b(0);
-#define Func2(a,b,c) FuncBegin((a),2);{var b(0),c(1);
-#define Func3(a,b,c,d) FuncBegin((a),3);{var b(0),c(1),d(2);
-#define Func4(a,b,c,d,e) FuncBegin((a),4);{var b(0),c(1),d(2),e(3);
-#define Func5(a,b,c,d,e,f) FuncBegin((a),5);{var b(0),c(1),d(2),e(3),f(4);
-#define Func6(a,b,c,d,e,f,g) FuncBegin((a),6);{var b(0),c(1),d(2),e(3),f(4),g(5);
+#define Func0(a) FuncBegin(#a,0);{
+#define Func1(a,b) FuncBegin(#a,1);{var b(0);
+#define Func2(a,b,c) FuncBegin(#a,2);{var b(0),c(1);
+#define Func3(a,b,c,d) FuncBegin(#a,3);{var b(0),c(1),d(2);
+#define Func4(a,b,c,d,e) FuncBegin(#a,4);{var b(0),c(1),d(2),e(3);
+#define Func5(a,b,c,d,e,f) FuncBegin(#a,5);{var b(0),c(1),d(2),e(3),f(4);
+#define Func6(a,b,c,d,e,f,g) FuncBegin(#a,6);{var b(0),c(1),d(2),e(3),f(4),g(5);
 #define GET_MACRO(_1,_2,_3,_4,_5,_6,_7,NAME,...) NAME
 #define Func(...) GET_MACRO(__VA_ARGS__, Func6, Func5, Func4, Func3, Func2, Func1, Func0)(__VA_ARGS__)
+#define Stop while_true();
 #define End }BlockEnd();
 #define Return(a) FuncReturn((a))
-#define Break LoopBreak();
+#define Break LoopBreak()
+#define Finish StackCheck();}catch(char const* error){put(string("//")+error);}return 0;}
 #define Var var
 #define Mem mem
 #define Global glo
-int main(){
-    Setup();
+
+    Begin
     Var i;
     i=0x4000;
     Loop
         mem[i]=32767;
         i++;
-        If(i,"==",0x4020)
-            Break
+        If(i,==,0x4020)
+            Break;
         End
     End
-    Func("fib",x)
-        If(x,"==",-1)
-            Return(1);
-        End
-        If(x,"==",0)
+    Func(fib,x)
+        If(x,<=,1)
             Return(1);
         End
         Var ret;
         ret=0;
         x--;
-        ret+=Call("fib",x);
+        ret+=Call(fib,x);
         x--;
-        ret+=Call("fib",x);
+        ret+=Call(fib,x);
         Return(ret);
     End
     Var ans;
-    ans=Call("fib",mem[0]);
+    ans=Call(fib,mem[0]);
     mem[2]=ans;
-    while_true();
-    return 0;
-    }
+    Stop
+    Finish
+
