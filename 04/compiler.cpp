@@ -13,7 +13,59 @@ typedef pair<int,par>pr;
 //0x6000 KBD
 const int FlagTop=0x2000;
 const int StackTop=0x3000;
-void put(string s){puts(s.c_str());}
+vector<string>cmd;
+void put(string s){
+    cmd.push_back(s);
+    return;
+    }
+void optimize(){
+    int sz=cmd.size();
+    vector<string>result,optres;
+    string preA="-1";
+    for(int i=0;i<sz;i++){
+        string s=cmd[i];
+        string preCmd=result.size()>=1?result.back():"~~";
+        string preCmd2=result.size()>=2?result[result.size()-2]:"~~";
+        if(s.length()>1&&s[0]=='@'){
+            string nowA=s.substr(1);
+            if(preA==nowA)continue;
+            preA=nowA;
+            }
+        if(s.length()>1&&s[0]=='(')
+            preA="-1";
+        if(s.length()>1&&s[0]=='A')
+            preA="-1";
+        if(s.length()>2&&s[0]=='A')
+            preA="-1";
+        if(preCmd=="M=D"&&(s=="M=D"||s=="D=M"))continue;
+        if(preCmd=="D=M"&&(s=="M=D"||s=="D=M"))continue;
+        if(preCmd2=="M=D"&&preCmd=="A=M"&&s=="D=A")continue;
+        if(preCmd=="M=M+1"&&s=="M=M-1"){result.pop_back();continue;}
+        if(preCmd=="M=M-1"&&s=="M=M+1"){result.pop_back();continue;}
+        if(preCmd=="D=D+1"&&s=="D=D-1"){result.pop_back();continue;}
+        if(preCmd=="D=D-1"&&s=="D=D+1"){result.pop_back();continue;}
+        if(preCmd.length()>2&&s.length()>2&&preCmd=="M="&&s=="M="){result.pop_back();result.push_back(s);continue;}
+        if(preCmd.length()>2&&s.length()>2&&preCmd=="D="&&s=="D="){result.pop_back();result.push_back(s);continue;}
+        if(preCmd=="M=D"&&s=="M=M+1"){result.pop_back();result.push_back("M=D+1");continue;}
+        if(preCmd=="M=D"&&s=="M=M-1"){result.pop_back();result.push_back("M=D-1");continue;}
+        if(preCmd=="M=D"&&s=="M=-M"){result.pop_back();result.push_back("M=-D");continue;}
+        if(preCmd2=="M=D+1"&&preCmd=="A=M"&&s=="M=0"){result.pop_back();result.pop_back();result.push_back("A=D+1");result.push_back("M=0");continue;}
+        if(preCmd2=="M=D-1"&&preCmd=="A=M"&&s=="M=0"){result.pop_back();result.pop_back();result.push_back("A=D-1");result.push_back("M=0");continue;}
+        result.push_back(s);
+        }
+    sz=result.size();
+    for(int i=0;i<sz;i++){
+        string s=result[i];
+        string preCmd=optres.size()>=1?optres.back():"~~";
+        string preCmd2=optres.size()>=2?optres[optres.size()-2]:"~~";
+        if(preCmd.length()>2&&preCmd.substr(0,2)=="M="&&s=="D=M"){optres.pop_back();optres.push_back("MD="+preCmd.substr(2));continue;}
+        if(preCmd.length()>2&&preCmd.substr(0,2)=="M="&&s=="A=M"){optres.pop_back();optres.push_back("AM="+preCmd.substr(2));continue;}
+        if(preCmd.length()>2&&preCmd.substr(0,2)=="A="&&s=="D=A"){optres.pop_back();optres.push_back("AD="+preCmd.substr(2));continue;}
+        optres.push_back(s);
+        }
+    for(string &s:optres)
+        puts(s.c_str());
+    }
 void while_true(){
     string rng_string;
     for(int i=0;i<8;i++)
@@ -52,17 +104,35 @@ class obj{
                 put("A=M");
             }
         void operator=(int x){
-            if(x>=0){
+            if(x==0){
+                put("@"+ToStr(id));
+                run_star();
+                put("M=0");
+                }
+            else if(x==1){
+                put("@"+ToStr(id));
+                run_star();
+                put("M=1");
+                }
+            else if(x==-1){
+                put("@"+ToStr(id));
+                run_star();
+                put("M=-1");
+                }
+            else if(x>0){
                 put("@"+ToStr(x));
                 put("D=A");
+                put("@"+ToStr(id));
+                run_star();
+                put("M=D");
                 }
             else{
                 put("@"+ToStr(-x));
                 put("D=-A");
+                put("@"+ToStr(id));
+                run_star();
+                put("M=D");
                 }
-            put("@"+ToStr(id));
-            run_star();
-            put("M=D");
             }
         void operator=(const obj& x){
             put("@"+ToStr(x.id));
@@ -82,40 +152,68 @@ class obj{
         void operator++(int x){
             put("@"+ToStr(id));
             run_star();
-            put("D=M+1");
-            put("M=D");
+            put("M=M+1");
             }
         void operator--(int x){
             put("@"+ToStr(id));
             run_star();
-            put("D=M-1");
-            put("M=D");
+            put("M=M-1");
             }
         void operator+=(int x){
-            if(x>=0){
+            if(x==0)
+                return;
+            else if(x==1){
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M+1");
+                }
+            else if(x==-1){
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M-1");
+                }
+            else if(x>=0){
                 put("@"+ToStr(x));
                 put("D=A");
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M+D");
                 }
             else{
                 put("@"+ToStr(-x));
                 put("D=-A");
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M+D");
                 }
-            put("@"+ToStr(id));
-            run_star();
-            put("M=M+D");
             }
         void operator-=(int x){
-            if(x>=0){
+            if(x==0)
+                return;
+            else if(x==1){
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M-1");
+                }
+            else if(x==-1){
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M+1");
+                }
+            else if(x>=0){
                 put("@"+ToStr(x));
                 put("D=A");
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M-D");
                 }
             else{
                 put("@"+ToStr(-x));
                 put("D=-A");
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M-D");
                 }
-            put("@"+ToStr(id));
-            run_star();
-            put("M=M-D");
             }
         void operator+=(const obj &x){
             put("@"+ToStr(x.id));
@@ -132,6 +230,23 @@ class obj{
             put("@"+ToStr(id));
             run_star();
             put("M=M-D");
+            }
+        void operator*=(int x){
+            if(x==1)
+                return;
+            else if(x==-1){
+                put("@"+ToStr(id));
+                run_star();
+                put("M=-M");
+                }
+            else if(x==0){
+                put("@"+ToStr(id));
+                run_star();
+                put("M=0");
+                }
+            else{
+                throw "*= only support -1,0,1";
+                }
             }
         void toA(){
             put("@"+ToStr(id));
@@ -152,6 +267,7 @@ class var{
     private:
         int pos;
     public:
+        int get_pos(){return pos;}
         var(){
             pos=esp_ebp.top()++;
             glo["esp"]++;
@@ -164,23 +280,15 @@ class var{
             pos=x;
             }
         void operator=(int x){
-            pos=esp_ebp.top()++;
-            glo["esp"]++;
             (this->to_obj())=x;
             }
         void operator=(const var& x){
-            pos=esp_ebp.top()++;
-            glo["esp"]++;
-            (this->to_obj())=x;
+            (this->to_obj())=x.to_obj();
             }
         void operator=(const obj& x){
-            pos=esp_ebp.top()++;
-            glo["esp"]++;
             (this->to_obj())=x;
             }
         void operator=(string s){
-            pos=esp_ebp.top()++;
-            glo["esp"]++;
             (this->to_obj())=s;
             }
         /*explicit */operator obj(){
@@ -199,7 +307,7 @@ class var{
             var_id=!var_id;
             return ret;
             }
-        obj to_obj(){
+        obj to_obj()const{
             glo[var_id?"var1":"var2"]=glo["ebp"];
             glo[var_id?"var1":"var2"]+=pos;
             obj ret(glo[var_id?"var1":"var2"]);
@@ -218,6 +326,9 @@ class var{
             }
         void operator-=(int x){
             (this->to_obj())-=x;
+            }
+        void operator*=(int x){
+            (this->to_obj())*=x;
             }
         void operator+=(const obj &x){
             (this->to_obj())+=x;
@@ -274,7 +385,7 @@ void pop(){
 //...
 map<string,int>func_args;
 stack<string>func_stack;
-stack<int>block_stack;
+stack<int>block_stack,loop_esp_stack;
 void FuncBegin(string fun,int args=0){
     if(func_args.find(fun)!=func_args.end()) throw "multi define function error";
     block_stack.push(0);
@@ -304,8 +415,7 @@ void FuncEnd(){
     func_stack.pop();
     put("(Func_"+fun+"_return)");
     pop();
-    glo["esp"]--;
-    glo["esp"]--;
+    glo["esp"]-=2;
     mem[glo["esp"]].toA();
     put("0;JMP");
     put("(Func_"+fun+"_end)");
@@ -324,8 +434,7 @@ var FuncCall(string fun, Args... args){
     for(int i=0;i<8;i++)
         rng_string+=(rand()>>2)%26+'A';
     mem[glo["esp"]]=("Func_Call_"+rng_string+"_after");
-    glo["esp"]++;
-    glo["esp"]++;//return value
+    glo["esp"]+=2;//return value
     glo["arg"]=glo["esp"];
     FuncCallArgs(args...);
     put("@Func_"+fun+"_begin");
@@ -366,12 +475,13 @@ void IfBegin(T x,string cmp,S y){
 void IfEnd(){
     if(if_stack.empty()) throw "end without if error";
     string rng_string=if_stack.top();
-    if_stack.pop();
     put("(if_"+rng_string+"_end)");
+    if_stack.pop();
     }
 stack<string>loop_stack;
 void LoopBegin(){
     block_stack.push(2);
+    loop_esp_stack.push(esp_ebp.top());
     string rng_string;
     for(int i=0;i<8;i++)
         rng_string+=(rand()>>2)%26+'A';
@@ -381,12 +491,17 @@ void LoopBegin(){
 void LoopBreak(){
     if(loop_stack.empty()) throw "end without loop error";
     string rng_string=loop_stack.top();
+    int d=esp_ebp.top()-loop_esp_stack.top();
+    if(d)glo["esp"]-=d;
     put("@loop_"+rng_string+"_end");
     put("0;JMP");
     }
 void LoopEnd(){
     string rng_string=loop_stack.top();
     loop_stack.pop();
+    int d=esp_ebp.top()-loop_esp_stack.top();
+    loop_esp_stack.pop();
+    if(d)glo["esp"]-=d;
     put("@loop_"+rng_string+"_begin");
     put("0;JMP");
     put("(loop_"+rng_string+"_end)");
@@ -415,7 +530,17 @@ vector<string>ve;
 //W=32*16
 //H=256
 #define Begin int main(){try{Setup();
-#define Call(a,b) FuncCall(#a,b)
+
+#define CallFunction FuncCall
+#define Call0(a) FuncCall(#a)
+#define Call1(a,b) FuncCall(#a,b)
+#define Call2(a,b,c) FuncCall(#a,b,c)
+#define Call3(a,b,c,d) FuncCall(#a,b,c,d)
+#define Call4(a,b,c,d,e) FuncCall(#a,b,c,d,e)
+#define Call5(a,b,c,d,e,f) FuncCall(#a,b,c,d,e,f)
+#define Call6(a,b,c,d,e,f,g) FuncCall(#a,6,c,d,e,f,g)
+#define GET_MACRO2(_1,_2,_3,_4,_5,_6,_7,NAME,...) NAME
+#define Call(...) GET_MACRO2(__VA_ARGS__, Call6, Cal5, Call4, Call3, Call2, Call1, Call0)(__VA_ARGS__)
 #define Loop LoopBegin();{
 #define If(a,b,c) IfBegin((a),#b,(c));{
 #define Function(a,b) FuncBegin((a),(b));{
@@ -431,22 +556,42 @@ vector<string>ve;
 #define Stop while_true();
 #define End }BlockEnd();
 #define Return(a) FuncReturn((a))
-#define Break LoopBreak()
-#define Finish StackCheck();}catch(char const* error){put(string("//")+error);}return 0;}
+#define Break LoopBreak();
+#define Finish while_true();StackCheck();}catch(char const* error){puts(error);return 0;}optimize();return 0;}
 #define Var var
 #define Mem mem
 #define Global glo
 
-    Begin
-    Var i;
-    i=0x4000;
-    Loop
-        mem[i]=32767;
-        i++;
-        If(i,==,0x4020)
-            Break;
+Begin
+    Global["status"]=0;
+    Func(set_screen,x)
+        If(x,!=,Global["status"])
+            Global["status"]=x;
+            Var i;
+            i=0x4000;
+            Loop
+                mem[i]=x;
+                i++;
+                If(i,==,0x6000)
+                    Break;
+                End
+            End
         End
     End
+    Call(set_screen,0);
+    Var x;
+    Mem[0]=Global["ebp"];
+    Loop
+        x=0;
+        If(mem[0x6000],!=,0)
+            x=-1;
+        End
+        Call(set_screen,x);
+    End
+Finish
+
+/*
+Begin
     Func(fib,x)
         If(x,<=,1)
             Return(1);
@@ -459,9 +604,65 @@ vector<string>ve;
         ret+=Call(fib,x);
         Return(ret);
     End
-    Var ans;
-    ans=Call(fib,mem[0]);
-    mem[2]=ans;
-    Stop
-    Finish
-
+    Var i;
+    i=0;
+    Loop
+        mem[i]=Call(fib,i);
+        i++;
+        If(i,==,18)
+            Break
+        End
+    End
+Finish
+*/
+/*
+Begin
+    Mem[0]=1;
+    Mem[1]=1;
+    Var i;
+    i=2;
+    Loop
+        If(i,==,23)
+            Break
+        End
+        Mem[i]=0;
+        i++;
+    End
+    Func(fib,x)
+        If(Mem[x],!=,0)
+            Return(Mem[x]);
+        End
+        Var ret;
+        ret=0;
+        x--;
+        ret+=Call(fib,x);
+        x--;
+        ret+=Call(fib,x);
+        Return(ret);
+    End
+    i=2;
+    Loop
+        If(i,==,23)
+            Break
+        End
+        mem[i]=Call(fib,i);
+        i++;
+    End
+Finish
+*/
+/*
+Begin
+    Mem[2]=0;
+    If(Mem[0],<,0)
+        Mem[0]*=-1;
+        Mem[1]*=-1;
+    End
+    Loop
+        If(Mem[0],==,0)
+            Break
+        End
+        Mem[2]+=Mem[1];
+        Mem[0]--;
+    End
+Finish
+*/
