@@ -266,18 +266,22 @@ bool var_id;
 class var{
     private:
         int pos;
+        int level;
     public:
         int get_pos(){return pos;}
         var(){
             pos=esp_ebp.top()++;
             glo["esp"]++;
+            level=esp_ebp.size();
             }
         var(const var& x){
             pos=x.pos;
+            level=x.level;
             }
         var(const obj& x)=delete;
         var(int x){
             pos=x;
+            level=esp_ebp.size();
             }
         void operator=(int x){
             (this->to_obj())=x;
@@ -292,6 +296,7 @@ class var{
             (this->to_obj())=s;
             }
         /*explicit */operator obj(){
+            if(level!=esp_ebp.size())throw "outer var can't use in function error";
             glo[var_id?"var1":"var2"]=glo["ebp"];
             glo[var_id?"var1":"var2"]+=pos;
             obj ret(glo[var_id?"var1":"var2"]);
@@ -300,6 +305,7 @@ class var{
             return ret;
             }
         operator obj()const{
+            if(level!=esp_ebp.size())throw "outer var can't use in function error";
             glo[var_id?"var1":"var2"]=glo["ebp"];
             glo[var_id?"var1":"var2"]+=pos;
             obj ret(glo[var_id?"var1":"var2"]);
@@ -308,6 +314,7 @@ class var{
             return ret;
             }
         obj to_obj()const{
+            if(level!=esp_ebp.size())throw "outer var can't use in function error";
             glo[var_id?"var1":"var2"]=glo["ebp"];
             glo[var_id?"var1":"var2"]+=pos;
             obj ret(glo[var_id?"var1":"var2"]);
