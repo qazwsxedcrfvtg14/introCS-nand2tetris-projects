@@ -22,8 +22,20 @@ class Output{
         return Call(Output_DrawNumber,n,x,y);
         }
     };
+
 class Input{
     public:
+    static void Update(){
+        If(mem[KBD],!=,0)
+            Global["KBD"]=mem[KBD];
+        End
+        }
+    static void Clean(){
+        Global["KBD"]=0;
+        }
+    static obj Key(){
+        return Global["KBD"];
+        }
     static Var WaitEnter(){
         return Call(Input_WaitEnter);
         }

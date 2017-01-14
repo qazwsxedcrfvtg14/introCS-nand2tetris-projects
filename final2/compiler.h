@@ -6,13 +6,20 @@ using namespace std;
 #define s second
 typedef pair<int,int>par;
 typedef pair<int,par>pr;
-//0x0000~0x2EFF Mem
+//0x0000~0x05FF Mem
+//0x600~???
+//0x0F00~0x2EFF ScreenBuffer
+//0x2F00~0x3CFF //new
 //0x3D00~0x3DFF Flag
 //0x3E00~0x3FFF Stack
 //0x4000~0x5FFF Screen
 //0x6000 KBD
+const int ScreenBuffer=0x0F00;
 const int FlagTop=0x3D00;
 const int StackTop=0x3E00;
+const int Array_Pool_Begin=0x2F00;
+const int Array_Pool_Size=0xE00;
+
 vector<string>cmd;
 void put(string s){
     cmd.push_back(s);
@@ -93,6 +100,7 @@ string ToStr(T x){
     return s;
     }
 int objcnt=0;
+class var;
 class obj{
     private:
         int id;
@@ -237,6 +245,14 @@ class obj{
                 run_star();
                 put("M=M&D");
                 }
+            else if(x==-32768){
+                put("@"+ToStr(32767));
+                put("D=-A");
+                put("D=D-1");
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M&D");
+                }
             else{
                 put("@"+ToStr(-x));
                 put("D=-A");
@@ -252,6 +268,14 @@ class obj{
             else if(x>0){
                 put("@"+ToStr(x));
                 put("D=A");
+                put("@"+ToStr(id));
+                run_star();
+                put("M=M|D");
+                }
+            else if(x==-32768){
+                put("@"+ToStr(32767));
+                put("D=-A");
+                put("D=D-1");
                 put("@"+ToStr(id));
                 run_star();
                 put("M=M|D");
@@ -344,23 +368,6 @@ class obj{
             run_star();
             put("M=M|D");
             }
-        void operator*=(int x){
-            if(x==1)
-                return;
-            else if(x==-1){
-                put("@"+ToStr(id));
-                run_star();
-                put("M=-M");
-                }
-            else if(x==0){
-                put("@"+ToStr(id));
-                run_star();
-                put("M=0");
-                }
-            else{
-                throw "error: *= only support -1,0,1";
-                }
-            }
         void nt(){
             put("@"+ToStr(id));
             run_star();
@@ -377,10 +384,16 @@ class obj{
             put("A=M");
             put("D=A");
             }
+        void operator*=(int x);
+        void operator*=(const obj &x);
+        void operator/=(int x);
+        void operator/=(const obj &x);
+
     };
 map<string,obj> glo;
 stack<int> esp_ebp;
-bool var_id;
+int var_id;
+string var_string[4]={"var1","var2","var3","var4"};
 class var{
     private:
         int pos;
@@ -415,12 +428,12 @@ class var{
             (this->to_obj())=s;
             }
         obj to_obj()const{
-            if(level!=esp_ebp.size())throw "error: outer var can't use in function";
-            glo[var_id?"var1":"var2"]=glo["ebp"];
-            glo[var_id?"var1":"var2"]+=pos;
-            obj ret(glo[var_id?"var1":"var2"]);
+            if(level!=(int)esp_ebp.size())throw "error: outer var can't use in function";
+            glo[var_string[var_id]]=glo["ebp"];
+            glo[var_string[var_id]]+=pos;
+            obj ret(glo[var_string[var_id]]);
             ret.star++;
-            var_id=!var_id;
+            var_id=(var_id+1)%4;
             return ret;
             }
         /*explicit */operator obj(){
@@ -449,6 +462,15 @@ class var{
             }
         void operator*=(int x){
             (this->to_obj())*=x;
+            }
+        void operator*=(const obj &x){
+            (this->to_obj())*=x;
+            }
+        void operator/=(int x){
+            (this->to_obj())/=x;
+            }
+        void operator/=(const obj &x){
+            (this->to_obj())/=x;
             }
         void operator+=(const obj &x){
             (this->to_obj())+=x;
@@ -712,11 +734,10 @@ vector<string>ve;
 #define End }BlockEnd();
 #define Return(a) FuncReturn((a))
 #define Break LoopBreak();
-#define Finish while_true();StackCheck();}catch(char const* error){puts(error);return 0;}catch(string error){puts(error.c_str());return 0;}optimize(2);return 0;}
+#define Finish while_true();StackCheck();}catch(char const* error){puts(error);return 0;}catch(string error){puts(error.c_str());return 0;}optimize(0);return 0;}
 #define Var var
 #define Mem mem
 #define Global glo
 
 //const int ScreenBuffer=0x0F00;
-const int ScreenBuffer=0x0F00;
 const int KBD=0x6000;

@@ -5,4 +5,5 @@ Begin
     #include"builtin_lib.h"
     #include"snake_lib.h"
     Snake::Main();
+    //Func
 Finish

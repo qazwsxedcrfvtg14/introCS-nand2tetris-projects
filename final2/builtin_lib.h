@@ -1,5 +1,4 @@
-{
-obj i=glo["tmp_obj0"],j=glo["tmp_obj1"];
+{obj i=glo["tmp_obj0"],j=glo["tmp_obj1"];
 Func(Output_Clean)
     j=ScreenBuffer;
     Loop
@@ -15,15 +14,14 @@ Func(Output_Update)
     j=ScreenBuffer;
     Loop
         mem[i]=mem[j];
-        i++;
         j++;
+        i++;
         If(i,==,0x6000)
             Break;
         End
     End
 End
-{
-obj x1_high=glo["tmp_obj2"],x1_low=glo["tmp_obj3"],x2_high=glo["tmp_obj4"],x2_low=glo["tmp_obj5"],pos=glo["tmp_obj6"],line_begin=glo["tmp_obj7"];
+{obj x1_high=glo["tmp_obj2"],x1_low=glo["tmp_obj3"],x2_high=glo["tmp_obj4"],x2_low=glo["tmp_obj5"],pos=glo["tmp_obj6"],line_begin=glo["tmp_obj7"];
 Func(Output_DrawRect,x1,x2,y1,y2,col)
     If(x1,>,x2)
         Return(0);
@@ -384,3 +382,198 @@ Func(Output_Init)
     mem[2227]=17;mem[2228]=11;mem[2229]=11;
     mem[2230]=-1;
 End
+{obj pos=glo["tmp_obj0"],val=glo["tmp_obj1"],tmp=glo["tmp_obj2"],sz=glo["tmp_obj3"],pos2=glo["tmp_obj3"],tmp2=glo["tmp_obj4"];
+//const int mask11=-16384;
+const int umask11=16383;
+const int mask10=-32768;
+//const int umask10=32767;
+const int mask01=16384;
+const int umask01=-16385;
+Func(Array_Alloc,size)
+    sz=size;
+    pos=Array_Pool_Begin;
+    Loop
+        val=mem[pos];
+        tmp=val;
+        tmp&=mask10;
+        val&=umask11;
+        If(tmp,==,0)
+            If(val,>=,sz)
+                Break
+            End
+        End
+        pos+=val;
+        pos++;
+    End
+    tmp=mem[pos];
+    tmp&=mask01;
+    tmp2=sz;
+    tmp2|=tmp;
+    tmp2|=mask10;
+    mem[pos]=tmp2;
+    pos+=sz;
+    pos++;
+    val-=sz;
+    val--;
+    If(val,<,0)
+        val=mem[pos];
+    End
+    val|=mask01;
+    mem[pos]=val;
+    pos-=sz;
+    Return(pos);
+End
+Func(Array_Free,p)
+    p--;
+    pos=p;
+    val=mem[pos];
+    tmp=val;
+    tmp&=mask01;
+    val&=umask11;
+    If(tmp,==,0)
+        pos--;
+        pos=mem[pos];
+    End
+    pos2=p;
+    Loop
+        pos2+=val;
+        pos2++;
+        val=mem[pos2];
+        tmp=val;
+        tmp&=mask10;
+        val&=umask11;
+        If(tmp,!=,0)
+            Break
+        End
+    End
+    val=pos2;
+    val-=pos;
+    val--;
+    tmp=mem[pos];
+    tmp&=mask01;
+    val|=tmp;
+    mem[pos]=val;
+    mem[pos2]&=umask01;
+    pos2--;
+    mem[pos2]=pos;
+End
+}
+{obj tmp=glo["tmp_obj0"],tmp2=glo["tmp_obj1"],tmp3=glo["tmp_obj2"],tmp4=glo["tmp_obj3"],tmp5=glo["tmp_obj4"];
+Func(Math_Bit,x,n)
+    tmp=x;
+    tmp&=mem[n];
+    If(tmp,!=,0)
+        Return(1);
+    End
+    Return(0);
+End
+Func(Math_TwoToThe,n)
+    Return(mem[n]);
+End
+Func(Math_Abs,x)
+    tmp=x;
+    If(tmp,>=,0)
+        Return(tmp);
+    End
+    tmp*=-1;
+    Return(tmp);
+End
+Func(Math_LeftShift,x,y)
+    tmp=0;
+    tmp2=x;
+    Loop
+        If(tmp,>=,y)
+            Break
+        End
+        tmp2+=tmp2;
+    End
+    Return(tmp2);
+End
+Func(Math_Lowbit,x)
+    tmp=x;
+    tmp2=x;
+    tmp2*=-1;
+    tmp&=tmp2;
+    Return(tmp);
+End
+Func(Math_Xor,x,y)
+    tmp=x;
+    tmp2=y;
+    tmp2.nt();
+    tmp3=tmp;
+    tmp3&=tmp2;
+    tmp.nt();
+    tmp2.nt();
+    tmp&=tmp2;
+    tmp|=tmp3;
+    Return(tmp);
+End
+Func(Math_Multiply,x,y)
+    tmp=0;
+    tmp2=x;
+    tmp3=y;
+    tmp4=0;
+    Loop
+        If(tmp4,==,16)
+            Break
+        End
+        tmp5=y;
+        tmp5&=mem[tmp4];
+        If(tmp5,!=,0)
+            tmp+=tmp2;
+        End
+        tmp2+=tmp2;
+        tmp4++;
+    End
+    Return(tmp);
+End
+Func(Math_Divide,x,y)
+    Var z;
+    z=0;
+    If(x,<,0)
+        z+=1;
+        x*=-1;
+    End
+    If(y,<,0)
+        z-=1;
+        y*=-1;
+    End
+    If(y,>,x)
+        Return(0);
+    End
+    Var w,res;
+    w=y;
+    w+=y;
+    res=Math::Divide(x,w);
+    w=Math::Multiply(w,res);
+    w+=y;
+    res+=res;
+    If(x,>=,w)
+        res++;
+    End
+    If(z,!=,0)
+        res*=-1;
+    End
+    Return(res);
+End
+Func(Math_Mod,x,y)
+    Var res;
+    res=Math::Divide(x,y);
+    res=Math::Multiply(res,y);
+    res*=-1;
+    res+=x;
+    Return(res);
+End
+Func(Math_Max,x,y)
+    If(x,>,y)
+        Return(x);
+    End
+    Return(y);
+End
+Func(Math_Min,x,y)
+    If(x,<,y)
+        Return(x);
+    End
+    Return(y);
+End
+}

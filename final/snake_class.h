@@ -45,7 +45,8 @@ class Snake{
                 }
             Loop
                 Output::Clean();
-                If(Mem[KBD],==,130)
+                Input::Update();
+                If(Input::Key(),==,130)
                     Var tmp;
                     tmp=mem[ar];
                     tmp-=mem[ar+2];
@@ -54,7 +55,7 @@ class Snake{
                         vy=0;
                     End
                 End
-                If(Mem[KBD],==,131)
+                If(Input::Key(),==,131)
                     Var tmp;
                     tmp=mem[ar+1];
                     tmp-=mem[ar+3];
@@ -63,7 +64,7 @@ class Snake{
                         vy=-16;
                     End
                 End
-                If(Mem[KBD],==,132)
+                If(Input::Key(),==,132)
                     Var tmp;
                     tmp=mem[ar];
                     tmp-=mem[ar+2];
@@ -72,7 +73,7 @@ class Snake{
                         vy=0;
                     End
                 End
-                If(Mem[KBD],==,133)
+                If(Input::Key(),==,133)
                     Var tmp;
                     tmp=mem[ar+1];
                     tmp-=mem[ar+3];
@@ -81,6 +82,7 @@ class Snake{
                         vy=16;
                     End
                 End
+                Input::Clean();
                 Var i,j;
                 i=ar;
                 i+=len;
