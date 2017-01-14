@@ -31,19 +31,24 @@ Func(Output_DrawRect,x1,x2,y1,y2,col)
     End
     x1_low=x1;
     x1_low&=15;
+    x1_low+=16;
     x1_low=Mem[x1_low];
     x1_high=x1;
     x1_high&=-16;
-    x1_high+=32;
+    x1_high+=48;
     x1_high=Mem[x1_high];
     x2_low=x2;
     x2_low&=15;
-    x2_low+=16;
+    x2_low+=32;
     x2_low=Mem[x2_low];
     x2_high=x2;
     x2_high&=-16;
-    x2_high+=32;
+    x2_high+=48;
     x2_high=Mem[x2_high];
+    mem[0]=x1_low;
+    mem[1]=x1_high;
+    mem[2]=x2_low;
+    mem[3]=x2_high;
     If(x1_high,==,x2_high)
         x1_low&=x2_low;
         x2_low=x1_low;
@@ -138,6 +143,14 @@ Func(Input_WaitEnter)
 End
 
 Func(Output_Init)
+    for(int i=0;i<16;i++)
+        Mem[i+16]=-(1<<i);
+    //Mem[32]=-1;
+    for(int i=0;i<15;i++)
+        Mem[i+32]=(1<<i+1)-1;
+    Mem[47]=-1;
+    for(int i=0;i<32;i++)
+        Mem[(i<<4)+48]=i;
     mem[1536]=1552;
     mem[1552]=6;mem[1553]=16;mem[1554]=22;
     mem[1555]=7;mem[1556]=13;mem[1557]=22;
