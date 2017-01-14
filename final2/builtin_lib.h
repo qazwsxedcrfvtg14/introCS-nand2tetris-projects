@@ -10,6 +10,8 @@ Func(Output_Clean)
     End
 End
 Func(Output_Update)
+    Global["gray"]++;
+    Return(0);
     i=0x4000;
     j=ScreenBuffer;
     Loop
@@ -21,12 +23,15 @@ Func(Output_Update)
         End
     End
 End
-{obj x1_high=glo["tmp_obj2"],x1_low=glo["tmp_obj3"],x2_high=glo["tmp_obj4"],x2_low=glo["tmp_obj5"],pos=glo["tmp_obj6"],line_begin=glo["tmp_obj7"];
+{obj x1_high=glo["tmp_obj2"],x1_low=glo["tmp_obj3"],x2_high=glo["tmp_obj4"],x2_low=glo["tmp_obj5"],pos=glo["tmp_obj6"],line_begin=glo["tmp_obj7"],bi=glo["tmp_obj8"];
+obj y11=glo["tmp_obj9"],y22=glo["tmp_obj10"],gry=glo["tmp_obj11"];
 Func(Output_DrawRect,x1,x2,y1,y2,col)
+    y11=y1;
+    y22=y2;
     If(x1,>,x2)
         Return(0);
     End
-    If(y1,>,y2)
+    If(y11,>,y22)
         Return(0);
     End
     x1_low=x1;
@@ -45,10 +50,6 @@ Func(Output_DrawRect,x1,x2,y1,y2,col)
     x2_high&=-16;
     x2_high+=48;
     x2_high=Mem[x2_high];
-    mem[0]=x1_low;
-    mem[1]=x1_high;
-    mem[2]=x2_low;
-    mem[3]=x2_high;
     If(x1_high,==,x2_high)
         x1_low&=x2_low;
         x2_low=x1_low;
@@ -67,7 +68,31 @@ Func(Output_DrawRect,x1,x2,y1,y2,col)
     y32+=y32;//32
     line_begin+=y32;
     Loop
-        If(col,!=,0)
+        bi=y11;
+        bi+=Global["gray"];
+        bi&=1;
+        gry=Output::Gray_Mask;
+        gry+=bi;
+        If(col,==,2)
+            pos=line_begin;
+            pos+=x2_high;
+            mem[pos]|=x2_low;
+            mem[pos]&=mem[gry];
+            pos=line_begin;
+            pos+=x1_high;
+            mem[pos]|=x1_low;
+            mem[pos]&=mem[gry];
+            i=x1_high;
+            Loop
+                pos++;
+                i++;
+                If(i,>=,x2_high)
+                    Break
+                End
+                mem[pos]|=mem[gry];
+            End
+        End
+        If(col,==,1)
             pos=line_begin;
             pos+=x2_high;
             mem[pos]|=x2_low;
@@ -102,8 +127,8 @@ Func(Output_DrawRect,x1,x2,y1,y2,col)
             End
         End
         line_begin+=32;
-        y1++;
-        If(y1,>,y2)
+        y11++;
+        If(y11,>,y22)
             Break
         End
     End
@@ -141,7 +166,6 @@ Func(Input_WaitEnter)
         End
     End
 End
-
 Func(Output_Init)
     for(int i=0;i<16;i++)
         Mem[i+16]=-(1<<i);
@@ -151,6 +175,8 @@ Func(Output_Init)
     Mem[47]=-1;
     for(int i=0;i<32;i++)
         Mem[(i<<4)+48]=i;
+    mem[Output::Gray_Mask]=21845;
+    mem[Output::Gray_Mask+1]=-21846;
     mem[1536]=1552;
     mem[1552]=6;mem[1553]=16;mem[1554]=22;
     mem[1555]=7;mem[1556]=13;mem[1557]=22;

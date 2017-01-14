@@ -2,9 +2,31 @@ class Snake{
     private:
     static void Title(){
         Call(Snake_Title);
+        Output::Clean();
         }
     static void GameOver(){
         Call(GameOver,Global["score"]);
+        Output::Clean();
+        }
+    static void Sleep(){
+        Global["sleep"]=0;
+        Global["sleepX"]=0x1000;
+        Global["sleepY"]=Global["snack_length"];
+        Global["sleepY"]-=5;
+        Global["sleepY"]+=Global["sleepY"];
+        Global["sleepY"]+=Global["sleepY"];
+        Global["sleepY"]+=Global["sleepY"];
+        Global["sleepY"]+=Global["sleepY"];
+        Global["sleepY"]+=Global["sleepY"];
+        Global["sleepY"]+=Global["sleepY"];
+        Global["sleepX"]-=Global["sleepY"];
+        Loop
+            Input::Update();
+            Global["sleep"]++;
+            If(Global["sleep"],>=,Global["sleepX"])
+                Break
+            End
+        End
         }
     public:
     static void Main(){
@@ -22,20 +44,22 @@ class Snake{
             Global["rand1"]+=7122;
             Global["rand2"]+=Global["rand3"];
             Global["rand2"]+=7777;
-            Var vx,vy,len;
+            Var vx,vy;
             Var mx,my;
             mx=16*7;
             my=16*7;
             const int ar=0x0400,snake_len=5;
             vx=16;
             vy=0;
+            obj len=Global["snack_length"];
             len=snake_len;
             for(int i=0;i<snake_len;i++){
                 mem[ar+i*2]=16*(snake_len-i-1);
                 mem[ar+i*2+1]=0;
                 }
             Loop
-                Output::Clean();
+                Snake::Sleep();
+                //Output::Clean();
                 Input::Update();
                 If(Input::Key(),==,130)
                     Var tmp;
@@ -79,7 +103,16 @@ class Snake{
                 i+=len;
                 i+=len;
                 j=i;
-                j-=2;
+                j--;
+                Var x,xx,y,yy;
+                y=mem[j];
+                yy=y;
+                yy+=15;
+                j--;
+                x=mem[j];
+                xx=x;
+                xx+=15;
+                Output::DrawRect(x,xx,y,yy,0);
                 Loop
                     i--;j--;
                     mem[i]=mem[j];
@@ -106,8 +139,11 @@ class Snake{
                 i=ar;
                 i+=len;
                 i+=len;
-                Var gameover;
+                Var gameover,snack_col;
                 gameover=0;
+                snack_col=len;
+                snack_col++;
+                snack_col&=1;
                 Loop
                     Var x,y,xx,yy;
                     i--;
@@ -118,7 +154,8 @@ class Snake{
                     x=mem[i];
                     xx=x;
                     xx+=15;
-                    Output::DrawRect(x,xx,y,yy,1);
+                    snack_col++;
+                    Output::DrawRect(x,xx,y,yy,snack_col);
                     If(i,==,ar)
                         Break
                     End
@@ -128,11 +165,12 @@ class Snake{
                             Break
                         End
                     End
+                    snack_col&=1;
                 End
                 If(gameover,==,1)
                     Break
                 End
-                Var x,y,xx,yy;
+                //Var x,y,xx,yy;
                 y=my;
                 yy=y;
                 yy+=11;
@@ -179,6 +217,13 @@ class Snake{
                         End
                     End
                 End
+                Output::DrawRect(x,xx,y,yy,2);
+                x=mem[ar];
+                xx=x;
+                xx+=15;
+                y=mem[ar+1];
+                yy=y;
+                yy+=15;
                 Output::DrawRect(x,xx,y,yy,1);
                 Output::Update();
             End

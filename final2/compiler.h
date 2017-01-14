@@ -14,7 +14,8 @@ typedef pair<int,par>pr;
 //0x3E00~0x3FFF Stack
 //0x4000~0x5FFF Screen
 //0x6000 KBD
-const int ScreenBuffer=0x0F00;
+//const int ScreenBuffer=0x0F00;
+const int ScreenBuffer=0x4000;
 const int FlagTop=0x3D00;
 const int StackTop=0x3E00;
 const int Array_Pool_Begin=0x2F00;

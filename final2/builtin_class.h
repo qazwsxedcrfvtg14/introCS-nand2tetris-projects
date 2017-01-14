@@ -1,5 +1,6 @@
 class Output{
     public:
+    static const int Gray_Mask=50;
     static Var Init(){
         return Call(Output_Init);
         }
