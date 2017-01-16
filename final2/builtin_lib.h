@@ -11,7 +11,7 @@ Func(Output_Clean)
 End
 Func(Output_Update)
     Global["gray"]++;
-    Return(0);
+/*
     i=0x4000;
     j=ScreenBuffer;
     Loop
@@ -22,9 +22,10 @@ Func(Output_Update)
             Break;
         End
     End
+*/
 End
 {obj x1_high=glo["tmp_obj2"],x1_low=glo["tmp_obj3"],x2_high=glo["tmp_obj4"],x2_low=glo["tmp_obj5"],pos=glo["tmp_obj6"],line_begin=glo["tmp_obj7"],bi=glo["tmp_obj8"];
-obj y11=glo["tmp_obj9"],y22=glo["tmp_obj10"],gry=glo["tmp_obj11"];
+obj y11=glo["tmp_obj9"],y22=glo["tmp_obj10"],gry=glo["tmp_obj11"],y32=glo["tmp_obj12"];
 Func(Output_DrawRect,x1,x2,y1,y2,col)
     y11=y1;
     y22=y2;
@@ -54,18 +55,13 @@ Func(Output_DrawRect,x1,x2,y1,y2,col)
         x1_low&=x2_low;
         x2_low=x1_low;
     End
-    If(col,==,0)
+    If(col,<=,0)
         x1_low.nt();
         x2_low.nt();
     End
-    Var y32;
     line_begin=ScreenBuffer;
     y32=y1;
-    y32+=y32;//2
-    y32+=y32;//4
-    y32+=y32;//8
-    y32+=y32;//16
-    y32+=y32;//32
+    y32*=32;
     line_begin+=y32;
     Loop
         bi=y11;
@@ -89,7 +85,7 @@ Func(Output_DrawRect,x1,x2,y1,y2,col)
                 If(i,>=,x2_high)
                     Break
                 End
-                mem[pos]|=mem[gry];
+                mem[pos]=mem[gry];
             End
         End
         If(col,==,1)
@@ -106,7 +102,7 @@ Func(Output_DrawRect,x1,x2,y1,y2,col)
                 If(i,>=,x2_high)
                     Break
                 End
-                mem[pos]|=-1;
+                mem[pos]=-1;
             End
         End
         If(col,==,0)
@@ -126,6 +122,25 @@ Func(Output_DrawRect,x1,x2,y1,y2,col)
                 mem[pos]=0;
             End
         End
+        If(col,==,-1)
+            pos=line_begin;
+            pos+=x2_high;
+            mem[pos]&=x2_low;
+            mem[pos]|=mem[gry];
+            pos=line_begin;
+            pos+=x1_high;
+            mem[pos]&=x1_low;
+            mem[pos]|=mem[gry];
+            i=x1_high;
+            Loop
+                pos++;
+                i++;
+                If(i,>=,x2_high)
+                    Break
+                End
+                mem[pos]=mem[gry];
+            End
+        End
         line_begin+=32;
         y11++;
         If(y11,>,y22)
@@ -134,8 +149,8 @@ Func(Output_DrawRect,x1,x2,y1,y2,col)
     End
 End
 }}
-Func(Output_DrawVerticalLine,x,y1,y2)
-    Call(Output_DrawRect,x,x,y1,y2,0);
+Func(Output_DrawVerticalLine,x,y1,y2,col)
+    Call(Output_DrawRect,x,x,y1,y2,col);
 End
 Func(Output_DrawNumber,n,x,y)
     Var pos;
@@ -156,7 +171,7 @@ Func(Output_DrawNumber,n,x,y)
         a+=x;
         b+=y;
         c+=y;
-        Call(Output_DrawVerticalLine,a,b,c);
+        Call(Output_DrawVerticalLine,a,b,c,0);
     End
 End
 Func(Input_WaitEnter)
@@ -177,250 +192,220 @@ Func(Output_Init)
         Mem[(i<<4)+48]=i;
     mem[Output::Gray_Mask]=21845;
     mem[Output::Gray_Mask+1]=-21846;
-    mem[1536]=1552;
-    mem[1552]=6;mem[1553]=16;mem[1554]=22;
-    mem[1555]=7;mem[1556]=13;mem[1557]=22;
-    mem[1558]=8;mem[1559]=11;mem[1560]=23;
-    mem[1561]=9;mem[1562]=9;mem[1563]=15;
-    mem[1564]=9;mem[1565]=22;mem[1566]=23;
-    mem[1567]=10;mem[1568]=7;mem[1569]=12;
-    mem[1570]=10;mem[1571]=22;mem[1572]=23;
-    mem[1573]=11;mem[1574]=5;mem[1575]=9;
-    mem[1576]=11;mem[1577]=21;mem[1578]=22;
-    mem[1579]=12;mem[1580]=5;mem[1581]=7;
-    mem[1582]=12;mem[1583]=20;mem[1584]=22;
-    mem[1585]=13;mem[1586]=5;mem[1587]=6;
-    mem[1588]=13;mem[1589]=18;mem[1590]=21;
-    mem[1591]=14;mem[1592]=5;mem[1593]=6;
-    mem[1594]=14;mem[1595]=16;mem[1596]=20;
-    mem[1597]=15;mem[1598]=5;mem[1599]=6;
-    mem[1600]=15;mem[1601]=14;mem[1602]=19;
-    mem[1603]=16;mem[1604]=5;mem[1605]=6;
-    mem[1606]=16;mem[1607]=11;mem[1608]=17;
-    mem[1609]=17;mem[1610]=5;mem[1611]=15;
-    mem[1612]=18;mem[1613]=5;mem[1614]=13;
-    mem[1615]=19;mem[1616]=7;mem[1617]=10;
-    mem[1618]=-1;
-    mem[1537]=1619;
-    mem[1619]=9;mem[1620]=22;mem[1621]=23;
-    mem[1622]=10;mem[1623]=18;mem[1624]=23;
-    mem[1625]=11;mem[1626]=14;mem[1627]=23;
-    mem[1628]=12;mem[1629]=9;mem[1630]=23;
-    mem[1631]=13;mem[1632]=5;mem[1633]=17;
-    mem[1634]=14;mem[1635]=4;mem[1636]=12;
-    mem[1637]=15;mem[1638]=4;mem[1639]=8;
-    mem[1640]=-1;
-    mem[1538]=1641;
-    mem[1641]=5;mem[1642]=7;mem[1643]=8;
-    mem[1644]=6;mem[1645]=7;mem[1646]=8;
-    mem[1647]=7;mem[1648]=6;mem[1649]=8;
-    mem[1650]=7;mem[1651]=19;mem[1652]=23;
-    mem[1653]=8;mem[1654]=5;mem[1655]=8;
-    mem[1656]=8;mem[1657]=17;mem[1658]=23;
-    mem[1659]=9;mem[1660]=5;mem[1661]=6;
-    mem[1662]=9;mem[1663]=15;mem[1664]=23;
-    mem[1665]=10;mem[1666]=5;mem[1667]=5;
-    mem[1668]=10;mem[1669]=13;mem[1670]=18;
-    mem[1671]=10;mem[1672]=22;mem[1673]=23;
-    mem[1674]=11;mem[1675]=4;mem[1676]=5;
-    mem[1677]=11;mem[1678]=11;mem[1679]=16;
-    mem[1680]=11;mem[1681]=22;mem[1682]=23;
-    mem[1683]=12;mem[1684]=4;mem[1685]=5;
-    mem[1686]=12;mem[1687]=9;mem[1688]=14;
-    mem[1689]=12;mem[1690]=22;mem[1691]=22;
-    mem[1692]=13;mem[1693]=4;mem[1694]=12;
-    mem[1695]=13;mem[1696]=21;mem[1697]=22;
-    mem[1698]=14;mem[1699]=5;mem[1700]=10;
-    mem[1701]=14;mem[1702]=21;mem[1703]=22;
-    mem[1704]=15;mem[1705]=5;mem[1706]=8;
-    mem[1707]=15;mem[1708]=21;mem[1709]=21;
-    mem[1710]=16;mem[1711]=20;mem[1712]=21;
-    mem[1713]=17;mem[1714]=20;mem[1715]=21;
-    mem[1716]=-1;
-    mem[1539]=1717;
-    mem[1717]=4;mem[1718]=6;mem[1719]=6;
-    mem[1720]=5;mem[1721]=6;mem[1722]=6;
-    mem[1723]=6;mem[1724]=5;mem[1725]=6;
-    mem[1726]=7;mem[1727]=5;mem[1728]=6;
-    mem[1729]=7;mem[1730]=13;mem[1731]=13;
-    mem[1732]=8;mem[1733]=5;mem[1734]=6;
-    mem[1735]=8;mem[1736]=11;mem[1737]=13;
-    mem[1738]=9;mem[1739]=4;mem[1740]=5;
-    mem[1741]=9;mem[1742]=9;mem[1743]=14;
-    mem[1744]=9;mem[1745]=22;mem[1746]=23;
-    mem[1747]=10;mem[1748]=4;mem[1749]=5;
-    mem[1750]=10;mem[1751]=7;mem[1752]=14;
-    mem[1753]=10;mem[1754]=22;mem[1755]=23;
-    mem[1756]=11;mem[1757]=4;mem[1758]=10;
-    mem[1759]=11;mem[1760]=13;mem[1761]=14;
-    mem[1762]=11;mem[1763]=20;mem[1764]=23;
-    mem[1765]=12;mem[1766]=4;mem[1767]=8;
-    mem[1768]=12;mem[1769]=13;mem[1770]=13;
-    mem[1771]=12;mem[1772]=19;mem[1773]=22;
-    mem[1774]=13;mem[1775]=5;mem[1776]=6;
-    mem[1777]=13;mem[1778]=13;mem[1779]=14;
-    mem[1780]=13;mem[1781]=17;mem[1782]=21;
-    mem[1783]=14;mem[1784]=13;mem[1785]=20;
-    mem[1786]=15;mem[1787]=13;mem[1788]=18;
-    mem[1789]=16;mem[1790]=14;mem[1791]=16;
-    mem[1792]=-1;
-    mem[1540]=1793;
-    mem[1793]=4;mem[1794]=16;mem[1795]=19;
-    mem[1796]=5;mem[1797]=13;mem[1798]=19;
-    mem[1799]=6;mem[1800]=11;mem[1801]=19;
-    mem[1802]=7;mem[1803]=8;mem[1804]=14;
-    mem[1805]=7;mem[1806]=19;mem[1807]=19;
-    mem[1808]=7;mem[1809]=22;mem[1810]=23;
-    mem[1811]=8;mem[1812]=6;mem[1813]=12;
-    mem[1814]=8;mem[1815]=18;mem[1816]=23;
-    mem[1817]=9;mem[1818]=6;mem[1819]=9;
-    mem[1820]=9;mem[1821]=17;mem[1822]=23;
-    mem[1823]=10;mem[1824]=6;mem[1825]=7;
-    mem[1826]=10;mem[1827]=14;mem[1828]=21;
-    mem[1829]=11;mem[1830]=12;mem[1831]=19;
-    mem[1832]=12;mem[1833]=9;mem[1834]=15;
-    mem[1835]=12;mem[1836]=17;mem[1837]=18;
-    mem[1838]=13;mem[1839]=7;mem[1840]=13;
-    mem[1841]=13;mem[1842]=17;mem[1843]=18;
-    mem[1844]=14;mem[1845]=5;mem[1846]=10;
-    mem[1847]=14;mem[1848]=16;mem[1849]=17;
-    mem[1850]=15;mem[1851]=4;mem[1852]=8;
-    mem[1853]=15;mem[1854]=16;mem[1855]=17;
-    mem[1856]=16;mem[1857]=4;mem[1858]=6;
-    mem[1859]=16;mem[1860]=16;mem[1861]=17;
-    mem[1862]=-1;
-    mem[1541]=1863;
-    mem[1863]=5;mem[1864]=22;mem[1865]=22;
-    mem[1866]=6;mem[1867]=11;mem[1868]=15;
-    mem[1869]=6;mem[1870]=21;mem[1871]=23;
-    mem[1872]=7;mem[1873]=9;mem[1874]=16;
-    mem[1875]=7;mem[1876]=22;mem[1877]=23;
-    mem[1878]=8;mem[1879]=8;mem[1880]=16;
-    mem[1881]=8;mem[1882]=22;mem[1883]=23;
-    mem[1884]=9;mem[1885]=6;mem[1886]=10;
-    mem[1887]=9;mem[1888]=15;mem[1889]=17;
-    mem[1890]=9;mem[1891]=22;mem[1892]=23;
-    mem[1893]=10;mem[1894]=5;mem[1895]=9;
-    mem[1896]=10;mem[1897]=16;mem[1898]=18;
-    mem[1899]=10;mem[1900]=21;mem[1901]=23;
-    mem[1902]=11;mem[1903]=4;mem[1904]=8;
-    mem[1905]=11;mem[1906]=17;mem[1907]=22;
-    mem[1908]=12;mem[1909]=4;mem[1910]=8;
-    mem[1911]=12;mem[1912]=18;mem[1913]=22;
-    mem[1914]=13;mem[1915]=7;mem[1916]=8;
-    mem[1917]=13;mem[1918]=19;mem[1919]=21;
-    mem[1920]=14;mem[1921]=7;mem[1922]=8;
-    mem[1923]=14;mem[1924]=20;mem[1925]=20;
-    mem[1926]=15;mem[1927]=6;mem[1928]=7;
-    mem[1929]=16;mem[1930]=6;mem[1931]=7;
-    mem[1932]=17;mem[1933]=6;mem[1934]=7;
-    mem[1935]=18;mem[1936]=6;mem[1937]=7;
-    mem[1938]=-1;
-    mem[1542]=1939;
-    mem[1939]=4;mem[1940]=19;mem[1941]=21;
-    mem[1942]=5;mem[1943]=16;mem[1944]=22;
-    mem[1945]=6;mem[1946]=14;mem[1947]=23;
-    mem[1948]=7;mem[1949]=12;mem[1950]=18;
-    mem[1951]=7;mem[1952]=22;mem[1953]=23;
-    mem[1954]=8;mem[1955]=11;mem[1956]=15;
-    mem[1957]=8;mem[1958]=23;mem[1959]=23;
-    mem[1960]=9;mem[1961]=9;mem[1962]=13;
-    mem[1963]=9;mem[1964]=15;mem[1965]=16;
-    mem[1966]=9;mem[1967]=22;mem[1968]=23;
-    mem[1969]=10;mem[1970]=7;mem[1971]=11;
-    mem[1972]=10;mem[1973]=14;mem[1974]=16;
-    mem[1975]=10;mem[1976]=22;mem[1977]=23;
-    mem[1978]=11;mem[1979]=6;mem[1980]=10;
-    mem[1981]=11;mem[1982]=14;mem[1983]=15;
-    mem[1984]=11;mem[1985]=21;mem[1986]=22;
-    mem[1987]=12;mem[1988]=5;mem[1989]=8;
-    mem[1990]=12;mem[1991]=14;mem[1992]=15;
-    mem[1993]=12;mem[1994]=20;mem[1995]=22;
-    mem[1996]=13;mem[1997]=4;mem[1998]=7;
-    mem[1999]=13;mem[2000]=14;mem[2001]=15;
-    mem[2002]=13;mem[2003]=19;mem[2004]=21;
-    mem[2005]=14;mem[2006]=4;mem[2007]=5;
-    mem[2008]=14;mem[2009]=14;mem[2010]=21;
-    mem[2011]=15;mem[2012]=14;mem[2013]=20;
-    mem[2014]=16;mem[2015]=15;mem[2016]=19;
-    mem[2017]=-1;
-    mem[1543]=2018;
-    mem[2018]=4;mem[2019]=11;mem[2020]=12;
-    mem[2021]=5;mem[2022]=10;mem[2023]=12;
-    mem[2024]=6;mem[2025]=8;mem[2026]=11;
-    mem[2027]=7;mem[2028]=6;mem[2029]=10;
-    mem[2030]=7;mem[2031]=21;mem[2032]=23;
-    mem[2033]=8;mem[2034]=5;mem[2035]=9;
-    mem[2036]=8;mem[2037]=19;mem[2038]=23;
-    mem[2039]=9;mem[2040]=4;mem[2041]=7;
-    mem[2042]=9;mem[2043]=16;mem[2044]=23;
-    mem[2045]=10;mem[2046]=4;mem[2047]=6;
-    mem[2048]=10;mem[2049]=14;mem[2050]=20;
-    mem[2051]=11;mem[2052]=5;mem[2053]=6;
-    mem[2054]=11;mem[2055]=12;mem[2056]=18;
-    mem[2057]=12;mem[2058]=5;mem[2059]=6;
-    mem[2060]=12;mem[2061]=10;mem[2062]=15;
-    mem[2063]=13;mem[2064]=5;mem[2065]=5;
-    mem[2066]=13;mem[2067]=8;mem[2068]=13;
-    mem[2069]=14;mem[2070]=5;mem[2071]=11;
-    mem[2072]=15;mem[2073]=5;mem[2074]=9;
-    mem[2075]=16;mem[2076]=5;mem[2077]=7;
-    mem[2078]=17;mem[2079]=5;mem[2080]=5;
-    mem[2081]=-1;
-    mem[1544]=2082;
-    mem[2082]=4;mem[2083]=17;mem[2084]=22;
-    mem[2085]=5;mem[2086]=7;mem[2087]=8;
-    mem[2088]=5;mem[2089]=15;mem[2090]=23;
-    mem[2091]=6;mem[2092]=6;mem[2093]=10;
-    mem[2094]=6;mem[2095]=14;mem[2096]=23;
-    mem[2097]=7;mem[2098]=5;mem[2099]=17;
-    mem[2100]=7;mem[2101]=22;mem[2102]=23;
-    mem[2103]=8;mem[2104]=5;mem[2105]=6;
-    mem[2106]=8;mem[2107]=9;mem[2108]=15;
-    mem[2109]=8;mem[2110]=22;mem[2111]=23;
-    mem[2112]=9;mem[2113]=4;mem[2114]=5;
-    mem[2115]=9;mem[2116]=11;mem[2117]=16;
-    mem[2118]=9;mem[2119]=21;mem[2120]=23;
-    mem[2121]=10;mem[2122]=4;mem[2123]=5;
-    mem[2124]=10;mem[2125]=11;mem[2126]=23;
-    mem[2127]=11;mem[2128]=4;mem[2129]=5;
-    mem[2130]=11;mem[2131]=7;mem[2132]=12;
-    mem[2133]=11;mem[2134]=15;mem[2135]=22;
-    mem[2136]=12;mem[2137]=4;mem[2138]=11;
-    mem[2139]=12;mem[2140]=17;mem[2141]=21;
-    mem[2142]=13;mem[2143]=5;mem[2144]=10;
-    mem[2145]=14;mem[2146]=5;mem[2147]=10;
-    mem[2148]=15;mem[2149]=8;mem[2150]=9;
-    mem[2151]=16;mem[2152]=8;mem[2153]=9;
-    mem[2154]=17;mem[2155]=8;mem[2156]=8;
-    mem[2157]=-1;
-    mem[1545]=2158;
-    mem[2158]=4;mem[2159]=12;mem[2160]=15;
-    mem[2161]=5;mem[2162]=11;mem[2163]=16;
-    mem[2164]=6;mem[2165]=10;mem[2166]=16;
-    mem[2167]=7;mem[2168]=9;mem[2169]=12;
-    mem[2170]=7;mem[2171]=15;mem[2172]=16;
-    mem[2173]=8;mem[2174]=8;mem[2175]=10;
-    mem[2176]=8;mem[2177]=15;mem[2178]=16;
-    mem[2179]=8;mem[2180]=22;mem[2181]=24;
-    mem[2182]=9;mem[2183]=7;mem[2184]=9;
-    mem[2185]=9;mem[2186]=15;mem[2187]=16;
-    mem[2188]=9;mem[2189]=19;mem[2190]=24;
-    mem[2191]=10;mem[2192]=6;mem[2193]=8;
-    mem[2194]=10;mem[2195]=14;mem[2196]=15;
-    mem[2197]=10;mem[2198]=17;mem[2199]=24;
-    mem[2200]=11;mem[2201]=6;mem[2202]=8;
-    mem[2203]=11;mem[2204]=13;mem[2205]=22;
-    mem[2206]=12;mem[2207]=5;mem[2208]=7;
-    mem[2209]=12;mem[2210]=12;mem[2211]=19;
-    mem[2212]=13;mem[2213]=5;mem[2214]=6;
-    mem[2215]=13;mem[2216]=11;mem[2217]=16;
-    mem[2218]=14;mem[2219]=5;mem[2220]=14;
-    mem[2221]=15;mem[2222]=6;mem[2223]=12;
-    mem[2224]=16;mem[2225]=7;mem[2226]=11;
-    mem[2227]=17;mem[2228]=11;mem[2229]=11;
-    mem[2230]=-1;
+    Global["Output_cursor_x"]=0;
+    Global["Output_cursor_y"]=0;
+    Output::charset_mem_top=Output::charset_mem;
+
+    Output::Create(32,0,0,0,0,0,0,0,0,0,0);          //
+    Output::Create(33,12,30,30,30,12,12,0,12,12,0);  // !
+    Output::Create(34,54,54,20,0,0,0,0,0,0,0);       // "
+    Output::Create(35,0,18,18,63,18,18,63,18,18,0);  // #
+    Output::Create(36,12,30,51,3,30,48,51,30,12,12); // $
+    Output::Create(37,0,0,35,51,24,12,6,51,49,0);    // %
+    Output::Create(38,12,30,30,12,54,27,27,27,54,0); // &
+    Output::Create(39,12,12,6,0,0,0,0,0,0,0);        // '
+    Output::Create(40,24,12,6,6,6,6,6,12,24,0);      // (
+    Output::Create(41,6,12,24,24,24,24,24,12,6,0);   // )
+    Output::Create(42,0,0,0,51,30,63,30,51,0,0);     // *
+    Output::Create(43,0,0,0,12,12,63,12,12,0,0);     // +
+    Output::Create(44,0,0,0,0,0,0,0,12,12,6);        // ,
+    Output::Create(45,0,0,0,0,0,63,0,0,0,0);         // -
+    Output::Create(46,0,0,0,0,0,0,0,12,12,0);        // .
+    Output::Create(47,0,0,32,48,24,12,6,3,1,0);      // /
+
+    Output::Create(48,12,30,51,51,51,51,51,30,12,0); // 0
+    Output::Create(49,12,14,15,12,12,12,12,12,63,0); // 1
+    Output::Create(50,30,51,48,24,12,6,3,51,63,0);   // 2
+    Output::Create(51,30,51,48,48,28,48,48,51,30,0); // 3
+    Output::Create(52,16,24,28,26,25,63,24,24,60,0); // 4
+    Output::Create(53,63,3,3,31,48,48,48,51,30,0);   // 5
+    Output::Create(54,28,6,3,3,31,51,51,51,30,0);    // 6
+    Output::Create(55,63,49,48,48,24,12,12,12,12,0); // 7
+    Output::Create(56,30,51,51,51,30,51,51,51,30,0); // 8
+    Output::Create(57,30,51,51,51,62,48,48,24,14,0); // 9
+
+    Output::Create(58,0,0,12,12,0,0,12,12,0,0);      // :
+    Output::Create(59,0,0,12,12,0,0,12,12,6,0);      // ;
+    Output::Create(60,0,0,24,12,6,3,6,12,24,0);      // <
+    Output::Create(61,0,0,0,63,0,0,63,0,0,0);        // =
+    Output::Create(62,0,0,3,6,12,24,12,6,3,0);       // >
+    Output::Create(64,30,51,51,59,59,59,27,3,30,0);  // @
+    Output::Create(63,30,51,51,24,12,12,0,12,12,0);  // ?
+
+    Output::Create(65,12,30,51,51,63,51,51,51,51,0); // A
+    Output::Create(66,31,51,51,51,31,51,51,51,31,0); // B
+    Output::Create(67,28,54,35,3,3,3,35,54,28,0);    // C
+    Output::Create(68,15,27,51,51,51,51,51,27,15,0); // D
+    Output::Create(69,63,51,35,11,15,11,35,51,63,0); // E
+    Output::Create(70,63,51,35,11,15,11,3,3,3,0);    // F
+    Output::Create(71,28,54,35,3,59,51,51,54,44,0);  // G
+    Output::Create(72,51,51,51,51,63,51,51,51,51,0); // H
+    Output::Create(73,30,12,12,12,12,12,12,12,30,0); // I
+    Output::Create(74,60,24,24,24,24,24,27,27,14,0); // J
+    Output::Create(75,51,51,51,27,15,27,51,51,51,0); // K
+    Output::Create(76,3,3,3,3,3,3,35,51,63,0);       // L
+    Output::Create(77,33,51,63,63,51,51,51,51,51,0); // M
+    Output::Create(78,51,51,55,55,63,59,59,51,51,0); // N
+    Output::Create(79,30,51,51,51,51,51,51,51,30,0); // O
+    Output::Create(80,31,51,51,51,31,3,3,3,3,0);     // P
+    Output::Create(81,30,51,51,51,51,51,63,59,30,48);// Q
+    Output::Create(82,31,51,51,51,31,27,51,51,51,0); // R
+    Output::Create(83,30,51,51,6,28,48,51,51,30,0);  // S
+    Output::Create(84,63,63,45,12,12,12,12,12,30,0); // T
+    Output::Create(85,51,51,51,51,51,51,51,51,30,0); // U
+    Output::Create(86,51,51,51,51,51,30,30,12,12,0); // V
+    Output::Create(87,51,51,51,51,51,63,63,63,18,0); // W
+    Output::Create(88,51,51,30,30,12,30,30,51,51,0); // X
+    Output::Create(89,51,51,51,51,30,12,12,12,30,0); // Y
+    Output::Create(90,63,51,49,24,12,6,35,51,63,0);  // Z
+
+    Output::Create(91,30,6,6,6,6,6,6,6,30,0);          // [
+    Output::Create(92,0,0,1,3,6,12,24,48,32,0);        //
+    Output::Create(93,30,24,24,24,24,24,24,24,30,0);   // ]
+    Output::Create(94,8,28,54,0,0,0,0,0,0,0);          // ^
+    Output::Create(95,0,0,0,0,0,0,0,0,0,63);           // _
+    Output::Create(96,6,12,24,0,0,0,0,0,0,0);          // `
+
+    Output::Create(97,0,0,0,14,24,30,27,27,54,0);      // a
+    Output::Create(98,3,3,3,15,27,51,51,51,30,0);      // b
+    Output::Create(99,0,0,0,30,51,3,3,51,30,0);        // c
+    Output::Create(100,48,48,48,60,54,51,51,51,30,0);  // d
+    Output::Create(101,0,0,0,30,51,63,3,51,30,0);      // e
+    Output::Create(102,28,54,38,6,15,6,6,6,15,0);      // f
+    Output::Create(103,0,0,30,51,51,51,62,48,51,30);   // g
+    Output::Create(104,3,3,3,27,55,51,51,51,51,0);     // h
+    Output::Create(105,12,12,0,14,12,12,12,12,30,0);   // i
+    Output::Create(106,48,48,0,56,48,48,48,48,51,30);  // j
+    Output::Create(107,3,3,3,51,27,15,15,27,51,0);     // k
+    Output::Create(108,14,12,12,12,12,12,12,12,30,0);  // l
+    Output::Create(109,0,0,0,29,63,43,43,43,43,0);     // m
+    Output::Create(110,0,0,0,29,51,51,51,51,51,0);     // n
+    Output::Create(111,0,0,0,30,51,51,51,51,30,0);     // o
+    Output::Create(112,0,0,0,30,51,51,51,31,3,3);      // p
+    Output::Create(113,0,0,0,30,51,51,51,62,48,48);    // q
+    Output::Create(114,0,0,0,29,55,51,3,3,7,0);        // r
+    Output::Create(115,0,0,0,30,51,6,24,51,30,0);      // s
+    Output::Create(116,4,6,6,15,6,6,6,54,28,0);        // t
+    Output::Create(117,0,0,0,27,27,27,27,27,54,0);     // u
+    Output::Create(118,0,0,0,51,51,51,51,30,12,0);     // v
+    Output::Create(119,0,0,0,51,51,51,63,63,18,0);     // w
+    Output::Create(120,0,0,0,51,30,12,12,30,51,0);     // x
+    Output::Create(121,0,0,0,51,51,51,62,48,24,15);    // y
+    Output::Create(122,0,0,0,63,27,12,6,51,63,0);      // z
+
+    Output::Create(123,56,12,12,12,7,12,12,12,56,0);   // {
+    Output::Create(124,12,12,12,12,12,12,12,12,12,0);  // |
+    Output::Create(125,7,12,12,12,56,12,12,12,7,0);    // }
+    Output::Create(126,38,45,25,0,0,0,0,0,0,0);        // ~
+
 End
+
+//512x256
+Func(Output_GetMap,c)
+    c+=Output::charset;
+    Return(mem[c]);
+End
+Func(Output_MoveCursor,x,y)
+    Global["Output_cursor_x"]=x;
+    Global["Output_cursor_y"]=y;
+End
+{obj tmp=glo["tmp_obj0"],tmp2=glo["tmp_obj1"],i=glo["tmp_obj2"],msk=glo["tmp_obj3"],y32=glo["tmp_obj4"],line_begin=glo["tmp_obj5"],high=glo["tmp_obj6"],mk=glo["tmp_obj7"];
+obj y1=glo["tmp_obj8"],y2=glo["tmp_obj9"],dis=glo["tmp_obj10"],pos=glo["tmp_obj11"];
+Func(Output_PrintChar,c)
+    If(Global["Output_cursor_x"],==,512)
+        Output::PrintLine();
+    End
+    If(c,==,'\n')
+        Output::PrintLine();
+        Return(0);
+    End
+    If(c,==,128)
+        Output::PrintLine();
+        Return(0);
+    End
+    c+=Output::charset;
+    tmp2=mem[c];
+    tmp=Global["Output_cursor_x"];
+    tmp&=8;
+    msk=-256;
+    high=0;
+    If(tmp,!=,0)
+        high=1;
+        msk=255;
+    End
+    tmp=Global["Output_cursor_x"];
+    tmp&=-16;
+    tmp+=48;
+    tmp=mem[tmp];
+
+    line_begin=ScreenBuffer;
+    y32=Global["Output_cursor_y"];
+    y32*=32;
+    line_begin+=y32;
+    line_begin+=tmp;
+    i=0;
+    Loop
+        If(i,==,10)
+            Break;
+        End
+        mk=mem[tmp2];
+        If(high,!=,0)
+            mk*=1<<8;
+        End
+        mk*=2;
+        mem[line_begin]&=msk;
+        mem[line_begin]|=mk;
+        line_begin+=32;
+        tmp2++;
+        i++;
+    End
+    Global["Output_cursor_x"]+=8;
+End
+Func(Output_PrintLine)
+    Global["Output_cursor_x"]=0;
+    Global["Output_cursor_y"]+=12;
+    If(Global["Output_cursor_y"],>,256-12)
+        Global["Output_cursor_y"]-=256-12;
+        Output::Scroll(Global["Output_cursor_y"]);
+        Global["Output_cursor_y"]=256-12;
+    End
+End
+
+Func(Output_Scroll,d)
+    dis=d;
+    dis*=32;
+    y1=ScreenBuffer;
+    y2=ScreenBuffer;
+    y2+=dis;
+    Loop
+        mem[y1]=mem[y2];
+        y1++;
+        y2++;
+        If(y2,==,ScreenBuffer+0x2000)
+            Break
+        End
+    End
+    Loop
+        mem[y1]=0;
+        y1++;
+        If(y1,==,ScreenBuffer+0x2000)
+            Break
+        End
+    End
+End
+
+Func(Output_PrintString,s)
+    pos=s;
+    Loop
+        If(mem[pos],==,0)
+            Break
+        End
+        Output::PrintChar(mem[pos]);
+        pos++;
+    End
+End
+}
+
 {obj pos=glo["tmp_obj0"],val=glo["tmp_obj1"],tmp=glo["tmp_obj2"],sz=glo["tmp_obj3"],pos2=glo["tmp_obj3"],tmp2=glo["tmp_obj4"];
 //const int mask11=-16384;
 const int umask11=16383;

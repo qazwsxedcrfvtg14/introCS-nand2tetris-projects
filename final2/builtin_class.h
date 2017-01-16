@@ -14,16 +14,72 @@ class Output{
     static Var DrawRect(T0 x1, T1 x2, T2 y1, T3 y2, T4 col){
         return Call(Output_DrawRect,x1,x2,y1,y2,col);
         }
-    template<typename T0,typename T1,typename T2>
-    static Var DrawVerticalLine(T0 x, T1 y1, T2 y2){
-        return Call(Output_DrawVerticalLine,x,y1,y2);
+    template<typename T0,typename T1,typename T2,typename T3>
+    static Var DrawVerticalLine(T0 x, T1 y1, T2 y2,T3 col){
+        return Call(Output_DrawVerticalLine,x,y1,y2,col);
         }
     template<typename T0,typename T1,typename T2>
     static Var DrawNumber(T0 n, T1 x, T2 y){
         return Call(Output_DrawNumber,n,x,y);
         }
+    static const int charset=0x240;
+    static const int charset_mem=0x340;
+    static int charset_mem_top;
+    static void Create(int index, int a, int b, int c, int d, int e, int f, int g, int h, int i, int j){
+        mem[charset+index]=charset_mem_top;
+        mem[charset_mem_top+0] = a;
+        mem[charset_mem_top+1] = b;
+        mem[charset_mem_top+2] = c;
+        mem[charset_mem_top+3] = d;
+        mem[charset_mem_top+4] = e;
+        mem[charset_mem_top+5] = f;
+        mem[charset_mem_top+6] = g;
+        mem[charset_mem_top+7] = h;
+        mem[charset_mem_top+8] = i;
+        mem[charset_mem_top+9] = j;
+        charset_mem_top+=10;
+        }
+    template<typename T0>
+    static Var GetMap(T0 c){
+        return Call(Output_GetMap,c);
+        }
+    template<typename T0,typename T1>
+    static Var MoveCursor(T0 x,T1 y){
+        return Call(Output_MoveCursor,x,y);
+        }
+    template<typename T0>
+    static Var PrintChar(T0 c){
+        return Call(Output_PrintChar,c);
+        }
+    static Var PrintLine(){
+        return Call(Output_PrintLine);
+        }
+    template<typename T0>
+    static Var Scroll(T0 d){
+        return Call(Output_Scroll,d);
+        }
+    template<typename T0>
+    static Var PrintString(T0 s){
+        return Call(Output_PrintString,s);
+        }
     };
-
+class String{
+    public:
+        template<typename T0>
+        static void Set(T0 p,string s){
+            Global["String_set"]=p;
+            for(char c:s){
+                put("@"+ToStr((int)c));
+                put("D=A");
+                Global["String_set"].toA();
+                put("M=D");
+                Global["String_set"]++;
+                }
+            Global["String_set"].toA();
+            put("M=0");
+            }
+    };
+int Output::charset_mem_top;
 class Input{
     public:
     static void Update(){
@@ -119,6 +175,14 @@ void obj::operator*=(int x){
         put("@"+ToStr(id));
         run_star();
         put("M=0");
+        }
+    else if(__builtin_popcount(x)==1){
+        put("@"+ToStr(id));
+        run_star();
+        int y=__lg(x);
+        for(int i=0;i<y;i++)
+            put("D=M"),
+            put("M=M+D");
         }
     else{
         Math::Divide(*this,x).toD();

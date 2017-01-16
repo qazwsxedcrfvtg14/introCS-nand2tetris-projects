@@ -735,7 +735,7 @@ vector<string>ve;
 #define End }BlockEnd();
 #define Return(a) FuncReturn((a))
 #define Break LoopBreak();
-#define Finish while_true();StackCheck();}catch(char const* error){puts(error);return 0;}catch(string error){puts(error.c_str());return 0;}optimize(0);return 0;}
+#define Finish while_true();StackCheck();}catch(char const* error){puts(error);return 0;}catch(string error){puts(error.c_str());return 0;}optimize(2);return 0;}
 #define Var var
 #define Mem mem
 #define Global glo

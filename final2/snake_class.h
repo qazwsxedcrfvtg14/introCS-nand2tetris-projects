@@ -30,6 +30,7 @@ class Snake{
         }
     public:
     static void Main(){
+        Init();
         Snake::Title();
         Loop
             Global["score"]=0;
@@ -229,5 +230,8 @@ class Snake{
             End
             Snake::GameOver();
         End
+        }
+    static void Init(){
+        Call(Snake_Init);
         }
     };
