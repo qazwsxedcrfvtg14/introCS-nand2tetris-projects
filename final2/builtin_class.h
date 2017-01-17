@@ -83,8 +83,9 @@ int Output::charset_mem_top;
 class Input{
     public:
     static void Update(){
-        If(mem[KBD],!=,0)
-            Global["KBD"]=mem[KBD];
+        Global["KBD2"]=mem[KBD];
+        If(Global["KBD2"],!=,0)
+            Global["KBD"]=Global["KBD2"];
         End
         }
     static void Clean(){
