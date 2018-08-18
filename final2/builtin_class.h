@@ -23,7 +23,7 @@ class Output{
         return Call(Output_DrawNumber,n,x,y);
         }
     static const int charset=0x240;
-    static const int charset_mem=0x340;
+    static const int charset_mem=0xA00;
     static int charset_mem_top;
     static void Create(int index, int a, int b, int c, int d, int e, int f, int g, int h, int i, int j){
         mem[charset+index]=charset_mem_top;
